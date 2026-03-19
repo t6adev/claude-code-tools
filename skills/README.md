@@ -20,6 +20,7 @@
 | スキル | コマンド | 説明 |
 |---|---|---|
 | [workflow-planning](meta/workflow-planning/) | `/workflow-planning` | 非自明なタスクの計画・実行・検証サイクル |
+| [subagent-strategy](meta/subagent-strategy/) | `/subagent-strategy` | サブエージェントを活用した並列実行・調査委譲・コンテキスト管理 |
 
 ## インストール方法
 
@@ -33,6 +34,7 @@ ln -s "$REPO/skills/git/commit" ~/.claude/skills/commit
 ln -s "$REPO/skills/git/review-pr" ~/.claude/skills/review-pr
 ln -s "$REPO/skills/code/explain" ~/.claude/skills/explain
 ln -s "$REPO/skills/meta/workflow-planning" ~/.claude/skills/workflow-planning
+ln -s "$REPO/skills/meta/subagent-strategy" ~/.claude/skills/subagent-strategy
 ```
 
 ## 新しいスキルを追加する
