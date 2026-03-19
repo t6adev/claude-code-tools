@@ -47,14 +47,27 @@ ln -s "$REPO/skills/git/commit" ~/.claude/skills/commit
 ln -s "$REPO/agents/review/code-reviewer" ~/.claude/agents/code-reviewer
 ```
 
-### プロジェクトへコピー
+### プロジェクトへの導入
 
-プロジェクトを自己完結させたい場合はコピーします。
+別プロジェクトの `.claude/` に skills・agents をシンボリックリンクし、CLAUDE.md テンプレートを配置します。
 
 ```bash
-REPO=~/path/to/claude-code-tools
-cp -r "$REPO/skills/git/commit" .claude/skills/
-cp "$REPO/templates/typescript-node/CLAUDE.md" ./CLAUDE.md
+cd ~/my-project
+~/path/to/claude-code-tools/install.sh --project                    # base テンプレート
+~/path/to/claude-code-tools/install.sh --project=typescript-node    # テンプレート指定
+~/path/to/claude-code-tools/install.sh --project --dry-run          # 確認のみ
+```
+
+シンボリックリンクを使うため、`git pull` するだけで全プロジェクトに即座に反映されます。
+
+### アップデート
+
+```bash
+# skills/agents のアップデート（シンボリックリンクのため自動反映）
+cd ~/path/to/claude-code-tools && git pull
+
+# 新たに追加された plugins をインストール
+~/path/to/claude-code-tools/install.sh --no-skills --no-agents
 ```
 
 ## ディレクトリ詳細
