@@ -14,7 +14,7 @@ project/     プロジェクトへ installable（skills, agents, templates, reco
 global/      グローバル ~/.claude/ へ installable（hooks, mcp）
   hooks/       Hook スクリプト・設定スニペット
   mcp/         MCP サーバー設定テンプレート
-docs/        設計思想・貢献ガイド（このリポジトリ向け）
+docs/        設計思想・オーサリングガイド（このリポジトリ向け）
 ```
 
 ## このリポジトリで作業する際のルール
