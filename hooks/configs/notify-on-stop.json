@@ -1,0 +1,17 @@
+{
+  "_comment": "応答完了通知のプリセット。~/.claude/settings.json の hooks セクションにマージして使う。",
+  "_scripts_note": "notify-on-stop.sh のパスは実際のインストール先に合わせて変更すること。",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-on-stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "_comment": "安全フックのプリセット。~/.claude/settings.json の hooks セクションにマージして使う。",
+  "_scripts_note": "block-dangerous-rm.sh のパスは実際のインストール先に合わせて変更すること。",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-dangerous-rm.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
