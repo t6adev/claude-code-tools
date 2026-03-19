@@ -10,7 +10,7 @@
 | [`commit-commands`](commit-commands/) | anthropics/claude-code | `/commit` などの git workflow 自動化コマンド |
 | [`code-review`](code-review/) | anthropics/claude-code | PR レビューの自動化（parallel agents） |
 | [`pr-review-toolkit`](pr-review-toolkit/) | anthropics/claude-code | 6専門エージェントによる包括的PRレビュー |
-| [`feature-dev`](feature-dev/) | anthropics/claude-code | 7フェーズ体系的フィーチャー開発ワークフロー |
+| [`feature-dev`](feature-dev/) | anthropics/claude-code | 7フェーズ体系的フィーチャー開発ワークフロー（大規模機能開発向け） |
 | [`hookify`](hookify/) | anthropics/claude-code | マークダウンルールによるカスタムフック管理 |
 | [`security-guidance`](security-guidance/) | anthropics/claude-code | PreToolUseフックによるセキュリティ監視（9パターン） |
 | [`frontend-design`](frontend-design/) | anthropics/claude-code | 汎用AI美学を避けた本番品質フロントエンドデザイン指針 |
