@@ -34,4 +34,4 @@ ln -s "$REPO/skills/code/pr-review-router" ~/.claude/skills/pr-review-router
 
 ## 新しいスキルを追加する
 
-[`docs/contributing.md`](../../docs/contributing.md) を参照してください。
+[`docs/skill-authoring-guide.md`](../../docs/skill-authoring-guide.md) を参照してください。

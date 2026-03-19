@@ -120,11 +120,3 @@ Claude Code のライフサイクルイベントに応じて実行される Hook
 ### global/mcp/
 
 MCP（Model Context Protocol）サーバーの設定テンプレートです。`~/.claude/.mcp.json` に自動マージされます（`jq` が必要）。
-
-## 貢献方法
-
-[`docs/contributing.md`](docs/contributing.md) を参照してください。
-
-## ライセンス
-
-MIT

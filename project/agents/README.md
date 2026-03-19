@@ -21,4 +21,4 @@ ln -s "$REPO/agents/testing/test-writer" ~/.claude/agents/test-writer
 
 ## 新しいエージェントを追加する
 
-[`docs/contributing.md`](../../docs/contributing.md) を参照してください。
+[`docs/agent-authoring-guide.md`](../../docs/agent-authoring-guide.md) を参照してください。

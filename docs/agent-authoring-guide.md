@@ -1,5 +1,22 @@
 # Agent 作成ガイド
 
+## ファイル構成
+
+```
+project/agents/<category>/<agent-name>/
+├── <agent-name>.md    # 機械可読な定義（必須・ファイル名はディレクトリ名と一致）
+└── README.md          # 人間向けドキュメント（必須）
+```
+
+## カテゴリ一覧
+
+| カテゴリ | 用途 |
+|---|---|
+| `review/` | コードレビュー・監査 |
+| `testing/` | テスト生成・品質保証 |
+| `docs/` | ドキュメント作成 |
+| `ops/` | デプロイ・インフラ操作 |
+
 ## ファイル命名規則
 
 エージェント定義ファイル名はディレクトリ名と一致させます。
@@ -102,3 +119,6 @@ model: sonnet
 - [ ] `description` が英語で役割と使用文脈を含んでいる
 - [ ] `tools` が必要最小限に絞られている（特に書き込み系は慎重に）
 - [ ] README.md が添付されている
+- [ ] `project/agents/README.md` のテーブルに追記している
+
+詳細は [pr-checklist.md](pr-checklist.md) を参照。
