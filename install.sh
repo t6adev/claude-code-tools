@@ -2,23 +2,26 @@
 # install.sh - claude-code-tools インストーラー
 #
 # 使い方:
-#   ./install.sh                           # 全てグローバルインストール
-#   ./install.sh --project                 # プロジェクトへの導入（base テンプレート）
-#   ./install.sh --project=typescript-node # テンプレート指定
+#   ./install.sh                           # デフォルト: skills + agents + plugins をインストール
+#   ./install.sh --add-hooks               # さらに hooks を追加
+#   ./install.sh --add-mcp                 # さらに mcp を追加
+#   ./install.sh --add-hooks --add-mcp     # global/ 全て追加
+#   ./install.sh --claude-md               # プロジェクトへ CLAUDE.md を配置（base テンプレート）
+#   ./install.sh --claude-md=typescript-node # テンプレート指定
 #   ./install.sh --dry-run                 # 実行内容を確認するだけ（変更なし）
-#   ./install.sh --no-plugins              # plugins をスキップ
-#   ./install.sh --no-skills --no-agents   # plugins のみ更新
-#   ./install.sh --no-hooks                # hooks のインストールをスキップ
-#   ./install.sh --no-mcp                  # mcp のインストールをスキップ
 #
-# インストール先（グローバル）:
+# インストール先（デフォルト）:
 #   ~/.claude/skills/   - Skills (slash commands)
 #   ~/.claude/agents/   - Agents (sub-agents)
-#   ~/.claude/hooks/    - Hook スクリプト
-#   ~/.claude/.mcp.json - MCP サーバー設定
 #   plugins             - claude CLI 経由でインストール
 #
-# インストール先（--project）:
+# インストール先（--add-hooks）:
+#   ~/.claude/hooks/    - Hook スクリプト
+#
+# インストール先（--add-mcp）:
+#   ~/.claude/.mcp.json - MCP サーバー設定
+#
+# インストール先（--claude-md）:
 #   ./.claude/skills/   - Skills (symlinks)
 #   ./.claude/agents/   - Agents (symlinks)
 #   ./CLAUDE.md         - テンプレートからコピー（既存は上書きしない）
@@ -27,27 +30,21 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=false
-SKIP_PLUGINS=false
-SKIP_SKILLS=false
-SKIP_AGENTS=false
-SKIP_HOOKS=false
-SKIP_MCP=false
-INSTALL_PROJECT=false
+ADD_HOOKS=false
+ADD_MCP=false
+INSTALL_CLAUDE_MD=false
 PROJECT_TEMPLATE="base"
 
 # --- オプション解析 ---
 for arg in "$@"; do
   case "$arg" in
-    --dry-run)      DRY_RUN=true ;;
-    --no-plugins)   SKIP_PLUGINS=true ;;
-    --no-skills)    SKIP_SKILLS=true ;;
-    --no-agents)    SKIP_AGENTS=true ;;
-    --no-hooks)     SKIP_HOOKS=true ;;
-    --no-mcp)       SKIP_MCP=true ;;
-    --project)      INSTALL_PROJECT=true ;;
-    --project=*)    INSTALL_PROJECT=true; PROJECT_TEMPLATE="${arg#--project=}" ;;
+    --dry-run)       DRY_RUN=true ;;
+    --add-hooks)     ADD_HOOKS=true ;;
+    --add-mcp)       ADD_MCP=true ;;
+    --claude-md)     INSTALL_CLAUDE_MD=true ;;
+    --claude-md=*)   INSTALL_CLAUDE_MD=true; PROJECT_TEMPLATE="${arg#--claude-md=}" ;;
     --help|-h)
-      sed -n '2,22p' "$0" | sed 's/^# //'
+      sed -n '2,28p' "$0" | sed 's/^# //'
       exit 0
       ;;
   esac
@@ -205,7 +202,7 @@ install_plugins() {
 # --- Project インストール ---
 install_project() {
   local template="$PROJECT_TEMPLATE"
-  local template_src="$REPO_DIR/project/templates/$template/CLAUDE.md"
+  local template_src="$REPO_DIR/project/claude-md-templates/$template/CLAUDE.md"
 
   info "プロジェクトへの導入 (template: $template)..."
 
@@ -218,9 +215,9 @@ install_project() {
 
   # テンプレートの存在確認
   if [ ! -f "$template_src" ]; then
-    echo "  [error] テンプレートが見つかりません: project/templates/$template/CLAUDE.md"
+    echo "  [error] テンプレートが見つかりません: project/claude-md-templates/$template/CLAUDE.md"
     echo "  利用可能なテンプレート:"
-    for t in "$REPO_DIR"/project/templates/*/; do
+    for t in "$REPO_DIR"/project/claude-md-templates/*/; do
       [ -f "$t/CLAUDE.md" ] && echo "    - $(basename "$t")"
     done
     exit 1
@@ -265,14 +262,14 @@ install_project() {
 echo "claude-code-tools インストーラー"
 $DRY_RUN && echo "(dry-run モード: 変更は行いません)"
 
-if $INSTALL_PROJECT; then
+if $INSTALL_CLAUDE_MD; then
   install_project
 else
-  $SKIP_SKILLS  || install_skills
-  $SKIP_AGENTS  || install_agents
-  $SKIP_HOOKS   || install_hooks
-  $SKIP_MCP     || install_mcp
-  $SKIP_PLUGINS || install_plugins
+  install_skills
+  install_agents
+  install_plugins
+  $ADD_HOOKS && install_hooks
+  $ADD_MCP   && install_mcp
 fi
 
 echo ""
