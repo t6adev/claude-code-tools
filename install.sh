@@ -188,16 +188,16 @@ install_plugins() {
   fi
 
   # 推薦 plugin リスト
-  # ソース: https://github.com/anthropics/claude-code/tree/main/plugins
+  # ソース: https://github.com/anthropics/claude-plugins-official/tree/main/plugins
   local plugins=(
-    "commit-commands@official"
-    "code-review@official"
-    "pr-review-toolkit@official"
-    "feature-dev@official"
-    "hookify@official"
-    "security-guidance@official"
-    "frontend-design@official"
-    "plugin-dev@official"
+    "commit-commands@claude-plugins-official"
+    "code-review@claude-plugins-official"
+    "pr-review-toolkit@claude-plugins-official"
+    "feature-dev@claude-plugins-official"
+    "hookify@claude-plugins-official"
+    "security-guidance@claude-plugins-official"
+    "frontend-design@claude-plugins-official"
+    "plugin-dev@claude-plugins-official"
   )
 
   for plugin in "${plugins[@]}"; do
