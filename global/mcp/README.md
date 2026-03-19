@@ -53,4 +53,4 @@ claude mcp add --transport stdio github \
 
 ## 新しいサーバーを追加する
 
-[`docs/contributing.md`](../docs/contributing.md) を参照してください。
+[`docs/contributing.md`](../../docs/contributing.md) を参照してください。

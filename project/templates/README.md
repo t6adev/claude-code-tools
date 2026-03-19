@@ -38,4 +38,4 @@ cp ~/path/to/claude-code-tools/templates/python-service/CLAUDE.md ./CLAUDE.md
 
 1. `templates/<project-type>/CLAUDE.md` を作成
 2. このファイルのテーブルに追記する
-3. [`docs/contributing.md`](../docs/contributing.md) の手順に従ってPRを作成
+3. [`docs/contributing.md`](../../docs/contributing.md) の手順に従ってPRを作成

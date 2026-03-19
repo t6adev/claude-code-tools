@@ -53,4 +53,4 @@ cp "$REPO/hooks/configs/safety-rails.json" ~/.claude/settings.json
 
 ## 新しいスクリプトを追加する
 
-[`docs/contributing.md`](../docs/contributing.md) を参照してください。
+[`docs/contributing.md`](../../docs/contributing.md) を参照してください。

@@ -8,10 +8,14 @@
 #   ./install.sh --dry-run                 # 実行内容を確認するだけ（変更なし）
 #   ./install.sh --no-plugins              # plugins をスキップ
 #   ./install.sh --no-skills --no-agents   # plugins のみ更新
+#   ./install.sh --no-hooks                # hooks のインストールをスキップ
+#   ./install.sh --no-mcp                  # mcp のインストールをスキップ
 #
 # インストール先（グローバル）:
 #   ~/.claude/skills/   - Skills (slash commands)
 #   ~/.claude/agents/   - Agents (sub-agents)
+#   ~/.claude/hooks/    - Hook スクリプト
+#   ~/.claude/.mcp.json - MCP サーバー設定
 #   plugins             - claude CLI 経由でインストール
 #
 # インストール先（--project）:
@@ -26,6 +30,8 @@ DRY_RUN=false
 SKIP_PLUGINS=false
 SKIP_SKILLS=false
 SKIP_AGENTS=false
+SKIP_HOOKS=false
+SKIP_MCP=false
 INSTALL_PROJECT=false
 PROJECT_TEMPLATE="base"
 
@@ -36,10 +42,12 @@ for arg in "$@"; do
     --no-plugins)   SKIP_PLUGINS=true ;;
     --no-skills)    SKIP_SKILLS=true ;;
     --no-agents)    SKIP_AGENTS=true ;;
+    --no-hooks)     SKIP_HOOKS=true ;;
+    --no-mcp)       SKIP_MCP=true ;;
     --project)      INSTALL_PROJECT=true ;;
     --project=*)    INSTALL_PROJECT=true; PROJECT_TEMPLATE="${arg#--project=}" ;;
     --help|-h)
-      sed -n '2,20p' "$0" | sed 's/^# //'
+      sed -n '2,22p' "$0" | sed 's/^# //'
       exit 0
       ;;
   esac
@@ -71,7 +79,7 @@ install_skills() {
   info "Skills をインストール中..."
   mkdir -p ~/.claude/skills
 
-  for skill_path in "$REPO_DIR"/skills/*/*; do
+  for skill_path in "$REPO_DIR"/project/skills/*/*; do
     [ -d "$skill_path" ] || continue
     local skill_name
     skill_name="$(basename "$skill_path")"
@@ -84,11 +92,79 @@ install_agents() {
   info "Agents をインストール中..."
   mkdir -p ~/.claude/agents
 
-  for agent_path in "$REPO_DIR"/agents/*/*; do
+  for agent_path in "$REPO_DIR"/project/agents/*/*; do
     [ -d "$agent_path" ] || continue
     local agent_name
     agent_name="$(basename "$agent_path")"
     symlink "$agent_path" "$HOME/.claude/agents/$agent_name"
+  done
+}
+
+# --- Hooks ---
+install_hooks() {
+  info "Hooks をインストール中..."
+  run "mkdir -p ~/.claude/hooks"
+
+  local hooks_scripts_dir="$REPO_DIR/global/hooks/scripts"
+  if [ ! -d "$hooks_scripts_dir" ]; then
+    log "skip: global/hooks/scripts/ が見つかりません"
+    return
+  fi
+
+  for script_path in "$hooks_scripts_dir"/**/*.sh "$hooks_scripts_dir"/*.sh; do
+    [ -f "$script_path" ] || continue
+    local script_name
+    script_name="$(basename "$script_path")"
+    if $DRY_RUN; then
+      echo "    [dry-run] cp \"$script_path\" ~/.claude/hooks/$script_name && chmod +x ~/.claude/hooks/$script_name"
+    else
+      if [ -f "$HOME/.claude/hooks/$script_name" ]; then
+        log "skip (already exists): ~/.claude/hooks/$script_name"
+      else
+        cp "$script_path" "$HOME/.claude/hooks/$script_name"
+        chmod +x "$HOME/.claude/hooks/$script_name"
+        log "copied: ~/.claude/hooks/$script_name"
+      fi
+    fi
+  done
+}
+
+# --- MCP ---
+install_mcp() {
+  info "MCP サーバー設定をインストール中..."
+
+  if ! command -v jq &>/dev/null; then
+    echo "  [warning] jq コマンドが見つかりません。mcp のインストールをスキップします。"
+    echo "            手動でインストールしてください: global/mcp/README.md を参照"
+    return
+  fi
+
+  local dst="$HOME/.claude/.mcp.json"
+  local mcp_dir="$REPO_DIR/global/mcp"
+
+  for mcp_src in "$mcp_dir"/*/.mcp.json; do
+    [ -f "$mcp_src" ] || continue
+    local server_dir
+    server_dir="$(basename "$(dirname "$mcp_src")")"
+
+    if $DRY_RUN; then
+      echo "    [dry-run] merge $server_dir entries from $mcp_src into $dst"
+      continue
+    fi
+
+    # 既存ファイルがなければ空の mcpServers を作成
+    if [ ! -f "$dst" ]; then
+      echo '{"mcpServers":{}}' > "$dst"
+    fi
+
+    # 各エントリをマージ（既存エントリはスキップ）
+    local new_entries
+    new_entries="$(jq '.mcpServers' "$mcp_src")"
+    local merged
+    merged="$(jq --argjson new "$new_entries" \
+      '.mcpServers = ($new + .mcpServers)' "$dst")"
+    echo "$merged" > "$dst"
+    log "merged: $server_dir entries → $dst"
   done
 }
 
@@ -98,7 +174,7 @@ install_plugins() {
 
   if ! command -v claude &>/dev/null; then
     echo "  [warning] claude コマンドが見つかりません。plugins のインストールをスキップします。"
-    echo "            手動でインストールしてください: recommended-plugins/README.md を参照"
+    echo "            手動でインストールしてください: project/recommended-plugins/README.md を参照"
     return
   fi
 
@@ -129,7 +205,7 @@ install_plugins() {
 # --- Project インストール ---
 install_project() {
   local template="$PROJECT_TEMPLATE"
-  local template_src="$REPO_DIR/templates/$template/CLAUDE.md"
+  local template_src="$REPO_DIR/project/templates/$template/CLAUDE.md"
 
   info "プロジェクトへの導入 (template: $template)..."
 
@@ -142,9 +218,9 @@ install_project() {
 
   # テンプレートの存在確認
   if [ ! -f "$template_src" ]; then
-    echo "  [error] テンプレートが見つかりません: templates/$template/CLAUDE.md"
+    echo "  [error] テンプレートが見つかりません: project/templates/$template/CLAUDE.md"
     echo "  利用可能なテンプレート:"
-    for t in "$REPO_DIR"/templates/*/; do
+    for t in "$REPO_DIR"/project/templates/*/; do
       [ -f "$t/CLAUDE.md" ] && echo "    - $(basename "$t")"
     done
     exit 1
@@ -153,7 +229,7 @@ install_project() {
   # .claude/skills/ にシンボリックリンク
   info "Skills をリンク中..."
   run "mkdir -p .claude/skills"
-  for skill_path in "$REPO_DIR"/skills/*/*; do
+  for skill_path in "$REPO_DIR"/project/skills/*/*; do
     [ -d "$skill_path" ] || continue
     local skill_name
     skill_name="$(basename "$skill_path")"
@@ -163,7 +239,7 @@ install_project() {
   # .claude/agents/ にシンボリックリンク
   info "Agents をリンク中..."
   run "mkdir -p .claude/agents"
-  for agent_path in "$REPO_DIR"/agents/*/*; do
+  for agent_path in "$REPO_DIR"/project/agents/*/*; do
     [ -d "$agent_path" ] || continue
     local agent_name
     agent_name="$(basename "$agent_path")"
@@ -194,6 +270,8 @@ if $INSTALL_PROJECT; then
 else
   $SKIP_SKILLS  || install_skills
   $SKIP_AGENTS  || install_agents
+  $SKIP_HOOKS   || install_hooks
+  $SKIP_MCP     || install_mcp
   $SKIP_PLUGINS || install_plugins
 fi
 
