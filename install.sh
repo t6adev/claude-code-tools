@@ -87,10 +87,16 @@ install_plugins() {
   fi
 
   # 推薦 plugin リスト
-  # 形式: "plugin-name@registry"
+  # ソース: https://github.com/anthropics/claude-code/tree/main/plugins
   local plugins=(
     "commit-commands@official"
     "code-review@official"
+    "pr-review-toolkit@official"
+    "feature-dev@official"
+    "hookify@official"
+    "security-guidance@official"
+    "frontend-design@official"
+    "plugin-dev@official"
   )
 
   for plugin in "${plugins[@]}"; do

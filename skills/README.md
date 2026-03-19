@@ -2,13 +2,6 @@
 
 スラッシュコマンドの一覧です。
 
-## git
-
-| スキル | コマンド | 説明 |
-|---|---|---|
-| [commit](git/commit/) | `/commit [scope]` | Conventional Commits 形式でコミットを作成 |
-| [review-pr](git/review-pr/) | `/review-pr [base-branch]` | PR のコードレビューを実施 |
-
 ## code
 
 | スキル | コマンド | 説明 |
@@ -31,8 +24,6 @@
 ```bash
 REPO=~/path/to/claude-code-tools
 
-ln -s "$REPO/skills/git/commit" ~/.claude/skills/commit
-ln -s "$REPO/skills/git/review-pr" ~/.claude/skills/review-pr
 ln -s "$REPO/skills/code/explain" ~/.claude/skills/explain
 ln -s "$REPO/skills/meta/workflow-planning" ~/.claude/skills/workflow-planning
 ln -s "$REPO/skills/meta/subagent-strategy" ~/.claude/skills/subagent-strategy

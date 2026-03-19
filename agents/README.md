@@ -2,12 +2,6 @@
 
 サブエージェントの一覧です。
 
-## review
-
-| エージェント | 説明 |
-|---|---|
-| [code-reviewer](review/code-reviewer/) | セキュリティ・正確性・保守性の観点からコードをレビュー |
-
 ## testing
 
 | エージェント | 説明 |
@@ -22,7 +16,6 @@
 ```bash
 REPO=~/path/to/claude-code-tools
 
-ln -s "$REPO/agents/review/code-reviewer" ~/.claude/agents/code-reviewer
 ln -s "$REPO/agents/testing/test-writer" ~/.claude/agents/test-writer
 ```
 
