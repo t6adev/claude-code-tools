@@ -2,34 +2,38 @@
 # install.sh - claude-code-tools インストーラー
 #
 # 使い方:
-#   ./install.sh                           # デフォルト: skills + agents + plugins をインストール
-#   ./install.sh --add-hooks               # さらに hooks を追加
-#   ./install.sh --add-mcp                 # さらに mcp を追加
-#   ./install.sh --add-hooks --add-mcp     # global/ 全て追加
-#   ./install.sh --claude-md               # プロジェクトへ CLAUDE.md を配置（base テンプレート）
+#   ./install.sh                           # デフォルト: ./.claude/ に skills + agents をインストール
+#   ./install.sh --claude-md               # さらに CLAUDE.md を配置（base テンプレート）
 #   ./install.sh --claude-md=typescript-node # テンプレート指定
+#   ./install.sh --global                  # ~/.claude/ に skills + agents をインストール、plugins も追加
+#   ./install.sh --global --add-hooks      # さらに hooks を追加
+#   ./install.sh --global --add-mcp        # さらに mcp を追加
+#   ./install.sh --global --add-hooks --add-mcp  # global/ 全て追加
 #   ./install.sh --dry-run                 # 実行内容を確認するだけ（変更なし）
 #
 # インストール先（デフォルト）:
-#   ~/.claude/skills/   - Skills (slash commands)
-#   ~/.claude/agents/   - Agents (sub-agents)
-#   plugins             - claude CLI 経由でインストール
-#
-# インストール先（--add-hooks）:
-#   ~/.claude/hooks/    - Hook スクリプト
-#
-# インストール先（--add-mcp）:
-#   ~/.claude/.mcp.json - MCP サーバー設定
+#   ./.claude/skills/  - Skills (slash commands, symlinks)
+#   ./.claude/agents/  - Agents (sub-agents, symlinks)
 #
 # インストール先（--claude-md）:
-#   ./.claude/skills/   - Skills (symlinks)
-#   ./.claude/agents/   - Agents (symlinks)
-#   ./CLAUDE.md         - テンプレートからコピー（既存は上書きしない）
+#   ./CLAUDE.md        - テンプレートからコピー（既存は上書きしない）
+#
+# インストール先（--global）:
+#   ~/.claude/skills/  - Skills (slash commands, symlinks)
+#   ~/.claude/agents/  - Agents (sub-agents, symlinks)
+#   plugins            - claude CLI 経由でインストール
+#
+# インストール先（--global --add-hooks）:
+#   ~/.claude/hooks/   - Hook スクリプト
+#
+# インストール先（--global --add-mcp）:
+#   ~/.claude/.mcp.json - MCP サーバー設定
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DRY_RUN=false
+GLOBAL=false
 ADD_HOOKS=false
 ADD_MCP=false
 INSTALL_CLAUDE_MD=false
@@ -39,12 +43,13 @@ PROJECT_TEMPLATE="base"
 for arg in "$@"; do
   case "$arg" in
     --dry-run)       DRY_RUN=true ;;
+    --global)        GLOBAL=true ;;
     --add-hooks)     ADD_HOOKS=true ;;
     --add-mcp)       ADD_MCP=true ;;
     --claude-md)     INSTALL_CLAUDE_MD=true ;;
     --claude-md=*)   INSTALL_CLAUDE_MD=true; PROJECT_TEMPLATE="${arg#--claude-md=}" ;;
     --help|-h)
-      sed -n '2,28p' "$0" | sed 's/^# //'
+      sed -n '2,31p' "$0" | sed 's/^# //'
       exit 0
       ;;
   esac
@@ -71,29 +76,36 @@ symlink() {
   fi
 }
 
+# --- インストール先ディレクトリ ---
+if $GLOBAL; then
+  INSTALL_DIR="$HOME/.claude"
+else
+  INSTALL_DIR="$PWD/.claude"
+fi
+
 # --- Skills ---
 install_skills() {
   info "Skills をインストール中..."
-  mkdir -p ~/.claude/skills
+  run "mkdir -p \"$INSTALL_DIR/skills\""
 
   for skill_path in "$REPO_DIR"/project/skills/*/*; do
     [ -d "$skill_path" ] || continue
     local skill_name
     skill_name="$(basename "$skill_path")"
-    symlink "$skill_path" "$HOME/.claude/skills/$skill_name"
+    symlink "$skill_path" "$INSTALL_DIR/skills/$skill_name"
   done
 }
 
 # --- Agents ---
 install_agents() {
   info "Agents をインストール中..."
-  mkdir -p ~/.claude/agents
+  run "mkdir -p \"$INSTALL_DIR/agents\""
 
   for agent_path in "$REPO_DIR"/project/agents/*/*; do
     [ -d "$agent_path" ] || continue
     local agent_name
     agent_name="$(basename "$agent_path")"
-    symlink "$agent_path" "$HOME/.claude/agents/$agent_name"
+    symlink "$agent_path" "$INSTALL_DIR/agents/$agent_name"
   done
 }
 
@@ -199,19 +211,10 @@ install_plugins() {
   done
 }
 
-# --- Project インストール ---
-install_project() {
+# --- CLAUDE.md ---
+install_claude_md() {
   local template="$PROJECT_TEMPLATE"
   local template_src="$REPO_DIR/project/claude-md-templates/$template/CLAUDE.md"
-
-  info "プロジェクトへの導入 (template: $template)..."
-
-  # 自分自身のリポジトリ内では実行不可
-  if [ "$PWD" = "$REPO_DIR" ]; then
-    echo "  [error] claude-code-tools リポジトリ内では実行できません。"
-    echo "          プロジェクトディレクトリで実行してください。"
-    exit 1
-  fi
 
   # テンプレートの存在確認
   if [ ! -f "$template_src" ]; then
@@ -223,27 +226,6 @@ install_project() {
     exit 1
   fi
 
-  # .claude/skills/ にシンボリックリンク
-  info "Skills をリンク中..."
-  run "mkdir -p .claude/skills"
-  for skill_path in "$REPO_DIR"/project/skills/*/*; do
-    [ -d "$skill_path" ] || continue
-    local skill_name
-    skill_name="$(basename "$skill_path")"
-    symlink "$skill_path" "$PWD/.claude/skills/$skill_name"
-  done
-
-  # .claude/agents/ にシンボリックリンク
-  info "Agents をリンク中..."
-  run "mkdir -p .claude/agents"
-  for agent_path in "$REPO_DIR"/project/agents/*/*; do
-    [ -d "$agent_path" ] || continue
-    local agent_name
-    agent_name="$(basename "$agent_path")"
-    symlink "$agent_path" "$PWD/.claude/agents/$agent_name"
-  done
-
-  # CLAUDE.md をコピー（既存は上書きしない）
   info "CLAUDE.md を配置中..."
   if [ -f "CLAUDE.md" ]; then
     log "skip (already exists): CLAUDE.md"
@@ -251,25 +233,30 @@ install_project() {
     run "cp \"$template_src\" CLAUDE.md"
     log "copied: CLAUDE.md (template: $template)"
   fi
-
-  echo ""
-  echo "  完了。次のステップ:"
-  echo "    1. CLAUDE.md をプロジェクト固有の情報で編集してください"
-  echo "    2. アップデート: cd $REPO_DIR && git pull"
 }
 
 # --- メイン ---
 echo "claude-code-tools インストーラー"
 $DRY_RUN && echo "(dry-run モード: 変更は行いません)"
 
-if $INSTALL_CLAUDE_MD; then
-  install_project
-else
+if $GLOBAL; then
   install_skills
   install_agents
   install_plugins
   $ADD_HOOKS && install_hooks
   $ADD_MCP   && install_mcp
+else
+  # 自リポジトリ内では実行不可
+  if [ "$PWD" = "$REPO_DIR" ]; then
+    echo "  [error] claude-code-tools リポジトリ内では実行できません。"
+    echo "          プロジェクトディレクトリで実行してください。"
+    echo "          グローバルインストールには --global を使用してください。"
+    exit 1
+  fi
+
+  install_skills
+  install_agents
+  $INSTALL_CLAUDE_MD && install_claude_md
 fi
 
 echo ""
