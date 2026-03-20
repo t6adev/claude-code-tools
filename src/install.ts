@@ -88,6 +88,7 @@ async function main(): Promise<void> {
   }
 
   // --- Step 2: Components ---
+  const claudeMdTemplates = !isGlobal ? discoverClaudeMdTemplates(REPO_DIR) : [];
   const componentOptions = [
     {
       value: "skills",
@@ -114,6 +115,11 @@ async function main(): Promise<void> {
       label: "MCP サーバー設定",
       hint: `${installDir}/.mcp.json`,
     },
+    ...claudeMdTemplates.map((t) => ({
+      value: `claude-md:${t}`,
+      label: `CLAUDE.md テンプレート: ${t}`,
+      hint: `${process.cwd()}/CLAUDE.md`,
+    })),
   ];
 
   const components = await multiselect({
@@ -130,29 +136,11 @@ async function main(): Promise<void> {
 
   const selectedComponents = components as string[];
 
-  // --- Step 3: CLAUDE.md template (local only) ---
-  let claudeMdTemplate: string | null = null;
-  if (!isGlobal) {
-    const templates = discoverClaudeMdTemplates(REPO_DIR);
-    const templateOptions = [
-      { value: "skip", label: "スキップ" },
-      ...templates.map((t) => ({ value: t, label: t })),
-    ];
-
-    const templateChoice = await select({
-      message: "CLAUDE.md テンプレートを配置しますか？",
-      options: templateOptions,
-    });
-
-    if (isCancel(templateChoice)) {
-      cancel("キャンセルしました。");
-      process.exit(0);
-    }
-
-    if (templateChoice !== "skip") {
-      claudeMdTemplate = templateChoice as string;
-    }
-  }
+  // Extract CLAUDE.md template from selection (value format: "claude-md:<template>")
+  const claudeMdEntry = selectedComponents.find((c) => c.startsWith("claude-md:"));
+  const claudeMdTemplate: string | null = claudeMdEntry
+    ? claudeMdEntry.slice("claude-md:".length)
+    : null;
 
   // --- Step 4: Dry run? ---
   const dryRun = await confirm({
