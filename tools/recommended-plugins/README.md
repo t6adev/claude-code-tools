@@ -35,8 +35,22 @@ claude plugin marketplace add <marketplace-name>
 ## Plugin を追加する
 
 1. `recommended-plugins/<plugin-name>/README.md` を作成
-2. このファイルの一覧に追記
-3. `install.sh` の plugin インストール処理に追記
+2. `recommended-plugins/<plugin-name>/plugin.yaml` を作成（install.sh が自動認識する）
+3. このファイルの一覧に追記
+
+### plugin.yaml のフォーマット
+
+```yaml
+plugin_id: <plugin-name>
+registry: <owner>/<repo>     # claude plugin marketplace add <registry>
+channel: <channel-name>      # claude plugin install <plugin_id>@<channel>
+enabled: true
+```
+
+- `plugin_id`: プラグイン名（`claude plugin install` の `@` より前の部分）
+- `registry`: マーケットプレイスの登録名（`claude plugin marketplace add` に渡す値、例: `anthropics/claude-code`）
+- `channel`: インストール時のチャンネル名（`@` より後の部分、例: `claude-code-plugins`）
+- `enabled`: `false` にするとインストール対象から除外される
 
 ### README.md のテンプレート
 

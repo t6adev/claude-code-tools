@@ -16,9 +16,17 @@
 
 ## インストール
 
+`install.sh` が [`plugin.yaml`](plugin.yaml) を自動認識してインストールします。
+
 ```bash
-claude plugin marketplace add anthropics/claude-code
-claude plugin install pr-review-toolkit@claude-code-plugins
+./install.sh  # またはグローバルインストール: ./install.sh --global
+```
+
+手動インストールする場合:
+
+```bash
+claude plugin marketplace add anthropics/claude-code  # registry の登録
+claude plugin install pr-review-toolkit@claude-code-plugins  # <plugin_id>@<channel>
 ```
 
 ## 提供エージェント

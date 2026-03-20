@@ -190,42 +190,43 @@ install_plugins() {
   local scope_flag=""
   $GLOBAL || scope_flag="--scope project"
 
-  # マーケットプレイスが未登録の場合は追加を試みる
-  if ! claude plugin marketplace list 2>/dev/null | grep -q "anthropics/claude-code"; then
-    if $DRY_RUN; then
-      echo "    [dry-run] claude plugin marketplace add anthropics/claude-code"
-    else
-      echo "  adding marketplace: anthropics/claude-code ..."
-      claude plugin marketplace add anthropics/claude-code 2>&1 || \
-        echo "  [warning] マーケットプレイスの追加に失敗しました。plugins インストールをスキップします。"
-      # マーケットプレイス追加が失敗した場合はスキップ
-      if ! claude plugin marketplace list 2>/dev/null | grep -q "anthropics/claude-code"; then
-        echo "            手動でインストールしてください: tools/recommended-plugins/README.md を参照"
-        return
+  # plugin.yaml を自動探索してインストール
+  # ソース: tools/recommended-plugins/*/plugin.yaml
+  # registry  = claude plugin marketplace add <registry>  で登録するマーケットプレイス名
+  # channel   = claude plugin install <plugin_id>@<channel> で使うチャンネル名
+  for yaml in "$REPO_DIR"/tools/recommended-plugins/*/plugin.yaml; do
+    [ -f "$yaml" ] || continue
+
+    local plugin_id registry channel enabled
+    plugin_id=$(grep '^plugin_id:' "$yaml" | sed 's/^plugin_id:[[:space:]]*//' | sed 's/[[:space:]]*#.*//')
+    registry=$(grep '^registry:'   "$yaml" | sed 's/^registry:[[:space:]]*//'  | sed 's/[[:space:]]*#.*//')
+    channel=$(grep '^channel:'     "$yaml" | sed 's/^channel:[[:space:]]*//'   | sed 's/[[:space:]]*#.*//')
+    enabled=$(grep '^enabled:'     "$yaml" | sed 's/^enabled:[[:space:]]*//'   | sed 's/[[:space:]]*#.*//')
+
+    # enabled: false のプラグインはスキップ
+    [ "$enabled" = "false" ] && continue
+
+    # registry が未登録の場合は追加を試みる
+    if ! claude plugin marketplace list 2>/dev/null | grep -q "$registry"; then
+      if $DRY_RUN; then
+        echo "    [dry-run] claude plugin marketplace add $registry"
+      else
+        echo "  adding marketplace: $registry ..."
+        claude plugin marketplace add "$registry" 2>&1 || true
+        if ! claude plugin marketplace list 2>/dev/null | grep -q "$registry"; then
+          echo "  [warning] $registry の登録に失敗しました。$plugin_id をスキップします。"
+          echo "            手動でインストールしてください: tools/recommended-plugins/README.md を参照"
+          continue
+        fi
       fi
     fi
-  fi
 
-  # 推薦 plugin リスト
-  # ソース: https://github.com/anthropics/claude-code/tree/main/plugins
-  local plugins=(
-    "commit-commands@claude-code-plugins"
-    "code-review@claude-code-plugins"
-    "pr-review-toolkit@claude-code-plugins"
-    "feature-dev@claude-code-plugins"
-    "hookify@claude-code-plugins"
-    "security-guidance@claude-code-plugins"
-    "frontend-design@claude-code-plugins"
-    "plugin-dev@claude-code-plugins"
-  )
-
-  for plugin in "${plugins[@]}"; do
-    local plugin_name="${plugin%@*}"
+    local plugin_ref="${plugin_id}@${channel}"
     if $DRY_RUN; then
-      echo "    [dry-run] claude plugin install $scope_flag $plugin"
+      echo "    [dry-run] claude plugin install $scope_flag $plugin_ref"
     else
-      echo "  installing $plugin_name ..."
-      claude plugin install $scope_flag "$plugin" || echo "  [warning] $plugin_name のインストールに失敗しました"
+      echo "  installing $plugin_id ..."
+      claude plugin install $scope_flag "$plugin_ref" || echo "  [warning] $plugin_id のインストールに失敗しました"
     fi
   done
 }

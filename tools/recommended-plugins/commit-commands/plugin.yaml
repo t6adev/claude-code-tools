@@ -1,0 +1,4 @@
+plugin_id: commit-commands
+registry: anthropics/claude-code   # claude plugin marketplace add <registry>
+channel: claude-code-plugins        # claude plugin install <plugin_id>@<channel>
+enabled: true
