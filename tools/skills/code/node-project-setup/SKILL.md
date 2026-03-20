@@ -13,6 +13,7 @@ Node.js プロジェクトを現代のベストプラクティスに従ってセ
 pnpm を基本パッケージマネージャーとして使用します。
 
 **最新版のインストール:**
+
 ```bash
 # 最新バージョンを確認してからインストール
 npm install -g pnpm@latest
@@ -21,6 +22,7 @@ corepack enable && corepack prepare pnpm@latest --activate
 ```
 
 `package.json` に `packageManager` フィールドを設定して pnpm バージョンを固定します:
+
 ```json
 {
   "packageManager": "pnpm@X.Y.Z"
@@ -32,6 +34,7 @@ corepack enable && corepack prepare pnpm@latest --activate
 ## 2. Version Configuration
 
 **Node.js の最新バージョン確認:**
+
 ```bash
 # 最新の LTS バージョンを確認
 node --version            # 現在の環境
@@ -39,6 +42,7 @@ node --version            # 現在の環境
 ```
 
 `package.json` の `engines` フィールドで Node.js と pnpm のバージョン制約を明示します:
+
 ```json
 {
   "engines": {
@@ -53,6 +57,7 @@ node --version            # 現在の環境
 ## 3. ESM (ES Modules) をデフォルトに
 
 `package.json` に `"type": "module"` を設定して ESM を標準とします:
+
 ```json
 {
   "type": "module"
@@ -62,11 +67,13 @@ node --version            # 現在の環境
 ## 4. TypeScript のセットアップ
 
 TypeScript を開発依存としてインストールします:
+
 ```bash
 pnpm add -D typescript @types/node
 ```
 
 `tsconfig.json` を作成します（strict + ESM 対応）:
+
 ```json
 {
   "compilerOptions": {
@@ -116,11 +123,13 @@ pnpm add -D oxlint @oxc-project/oxfmt
 ```
 
 **パターンの原則:**
+
 - 並列実行可能なチェック系タスクはすべて `check:` プレフィックスを付ける
 - `check` スクリプトは常に glob + parallel で実行する（個別スクリプトを直接列挙しない）
 - 新しいチェックを追加する際は `check:xxx` として追加するだけで自動的に `check` に含まれる
 
 同様のパターンを `test:` など他のカテゴリにも適用できます:
+
 ```json
 {
   "test": "pnpm run --parallel \"/^test:.*/\""
@@ -130,6 +139,7 @@ pnpm add -D oxlint @oxc-project/oxfmt
 ## 7. .npmrc 設定
 
 pnpm のデフォルト挙動を守るために `.npmrc` を作成します:
+
 ```ini
 shamefully-hoist=false
 strict-peer-dependencies=false
@@ -138,6 +148,7 @@ strict-peer-dependencies=false
 ## 8. package.json の完成形
 
 以下を組み合わせた `package.json` の例:
+
 ```json
 {
   "name": "my-project",
@@ -167,6 +178,7 @@ strict-peer-dependencies=false
 ## Verification
 
 セットアップ完了後に以下を実行して確認します:
+
 ```bash
 pnpm install
 pnpm check        # 型チェック・lint・フォーマットをすべて並列実行
