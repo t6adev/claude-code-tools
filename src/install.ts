@@ -20,6 +20,7 @@ import {
   discoverHookScripts,
   discoverMcpEntries,
   discoverClaudeMdTemplates,
+  type PluginInfo,
 } from "./discover.js";
 import { copyDir, copyFile, ensureDir } from "./copy.js";
 import { mergeMcpJson } from "./mcp-merge.js";
@@ -142,6 +143,34 @@ async function main(): Promise<void> {
     ? claudeMdEntry.slice("claude-md:".length)
     : null;
 
+  // --- Step 3: Optional plugins ---
+  let optionalPlugins: PluginInfo[] = [];
+  if (selectedComponents.includes("plugins")) {
+    const allPlugins = discoverPlugins(REPO_DIR);
+    const optionalCandidates = allPlugins.filter((p) => !p.enabled);
+    if (optionalCandidates.length > 0) {
+      const selected = await multiselect({
+        message:
+          "オプションプラグイン（デフォルト無効）も追加インストールしますか？（スペースで選択）",
+        options: optionalCandidates.map((p) => ({
+          value: p.pluginId,
+          label: p.pluginId,
+          hint: "オプション",
+        })),
+        initialValues: [],
+        required: false,
+      });
+      if (isCancel(selected)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+      const selectedIds = selected as string[];
+      optionalPlugins = optionalCandidates.filter((p) =>
+        selectedIds.includes(p.pluginId)
+      );
+    }
+  }
+
   // --- Step 4: Dry run? ---
   const dryRun = await confirm({
     message: "ドライラン（変更なしで確認のみ）モードで実行しますか？",
@@ -201,7 +230,10 @@ async function main(): Promise<void> {
   if (selectedComponents.includes("plugins")) {
     const s = spinner();
     s.start("Recommended Plugins をインストール中...");
-    const plugins = discoverPlugins(REPO_DIR).filter((p) => p.enabled);
+    const plugins = [
+      ...discoverPlugins(REPO_DIR).filter((p) => p.enabled),
+      ...optionalPlugins,
+    ];
     let installed = 0;
     let failed = 0;
     const failedPlugins: string[] = [];
