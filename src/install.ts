@@ -104,20 +104,16 @@ async function main(): Promise<void> {
       label: "Recommended Plugins",
       hint: "claude CLI 経由でインストール",
     },
-    ...(isGlobal
-      ? [
-          {
-            value: "hooks",
-            label: "Hooks（hook スクリプト）",
-            hint: "~/.claude/hooks/",
-          },
-          {
-            value: "mcp",
-            label: "MCP サーバー設定",
-            hint: "~/.claude/.mcp.json",
-          },
-        ]
-      : []),
+    {
+      value: "hooks",
+      label: "Hooks（hook スクリプト）",
+      hint: `${installDir}/hooks/`,
+    },
+    {
+      value: "mcp",
+      label: "MCP サーバー設定",
+      hint: `${installDir}/.mcp.json`,
+    },
   ];
 
   const components = await multiselect({
@@ -244,7 +240,7 @@ async function main(): Promise<void> {
   if (selectedComponents.includes("hooks")) {
     const s = spinner();
     s.start("Hooks をインストール中...");
-    const hooksDir = path.join(os.homedir(), ".claude", "hooks");
+    const hooksDir = path.join(installDir, "hooks");
     ensureDir(hooksDir, { dryRun: dryRun as boolean });
     const scripts = discoverHookScripts(REPO_DIR);
     let copied = 0;
@@ -262,7 +258,7 @@ async function main(): Promise<void> {
       `Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${scripts.length} 個）`
     );
     log.info(
-      "Hook の settings.json 設定は tools/hooks/configs/ を参照して手動でマージしてください。"
+      `Hook の settings.json 設定は tools/hooks/configs/ を参照して手動でマージしてください。（対象: ${installDir}/settings.json）`
     );
   }
 
@@ -270,7 +266,7 @@ async function main(): Promise<void> {
   if (selectedComponents.includes("mcp")) {
     const s = spinner();
     s.start("MCP サーバー設定をインストール中...");
-    const mcpDstPath = path.join(os.homedir(), ".claude", ".mcp.json");
+    const mcpDstPath = path.join(installDir, ".mcp.json");
     const entries = discoverMcpEntries(REPO_DIR);
     let merged = 0;
     let noop = 0;
