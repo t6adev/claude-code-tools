@@ -190,6 +190,22 @@ install_plugins() {
   local scope_flag=""
   $GLOBAL || scope_flag="--scope project"
 
+  # マーケットプレイスが未登録の場合は追加を試みる
+  if ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+    if $DRY_RUN; then
+      echo "    [dry-run] claude plugin marketplace add anthropics/claude-plugins-official"
+    else
+      echo "  adding marketplace: anthropics/claude-plugins-official ..."
+      claude plugin marketplace add anthropics/claude-plugins-official 2>&1 || \
+        echo "  [warning] マーケットプレイスの追加に失敗しました。plugins インストールをスキップします。"
+      # マーケットプレイス追加が失敗した場合はスキップ
+      if ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+        echo "            手動でインストールしてください: tools/recommended-plugins/README.md を参照"
+        return
+      fi
+    fi
+  fi
+
   # 推薦 plugin リスト
   # ソース: https://github.com/anthropics/claude-plugins-official/tree/main/plugins
   local plugins=(
