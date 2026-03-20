@@ -30,10 +30,10 @@
 
 ## インストール
 
-`install.sh` が [`plugin.yaml`](plugin.yaml) を自動認識してインストールします。
+インストーラーが [`plugin.yaml`](plugin.yaml) を自動認識してインストールします。
 
 ```bash
-./install.sh  # またはグローバルインストール: ./install.sh --global
+npx github:t6adev/claude-code-tools
 ```
 
 手動インストールする場合:

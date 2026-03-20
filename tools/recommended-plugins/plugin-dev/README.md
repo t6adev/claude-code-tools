@@ -16,7 +16,7 @@ Claude Code プラグイン開発に特化したツールキット。Skill・Age
 
 ## インストール
 
-`plugin.yaml` は `enabled: false` のため、`install.sh` のデフォルトインストール対象外です。
+`plugin.yaml` は `enabled: false` のため、インストーラーのデフォルトインストール対象外です。
 必要に応じて手動でインストールしてください:
 
 ```bash

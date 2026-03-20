@@ -26,16 +26,16 @@ claude plugin marketplace add <marketplace-name>
 
 ## 一括インストール
 
-リポジトリルートの `install.sh` を使うと、skills・agents・推薦 plugins を一括でインストールできます。
-
 ```bash
-./install.sh
+npx github:t6adev/claude-code-tools
 ```
+
+対話型 TUI で skills・agents・推薦 plugins を一括インストールできます。
 
 ## Plugin を追加する
 
 1. `recommended-plugins/<plugin-name>/README.md` を作成
-2. `recommended-plugins/<plugin-name>/plugin.yaml` を作成（install.sh が自動認識する）
+2. `recommended-plugins/<plugin-name>/plugin.yaml` を作成（インストーラーが自動認識する）
 3. このファイルの一覧に追記
 
 ### plugin.yaml のフォーマット

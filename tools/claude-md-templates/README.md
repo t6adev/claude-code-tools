@@ -15,11 +15,11 @@
 ## 使い方
 
 ```bash
-# install.sh を使う場合（推奨）
-~/path/to/claude-code-tools/install.sh --claude-md=typescript-node
+# npx で実行（推奨）— 対話型 TUI でテンプレートを選択
+npx github:t6adev/claude-code-tools
 
 # 手動コピーの場合
-cp ~/path/to/claude-code-tools/project/claude-md-templates/typescript-node/CLAUDE.md ./CLAUDE.md
+cp ~/path/to/claude-code-tools/tools/claude-md-templates/typescript-node/CLAUDE.md ./CLAUDE.md
 ```
 
 コピー後、プロジェクト固有の情報（プロジェクト名・コマンド・制約など）を編集してください。
