@@ -31,14 +31,14 @@ claude plugin install pr-review-toolkit@claude-code-plugins  # <plugin_id>@<chan
 
 ## 提供エージェント
 
-| エージェント | 説明 |
-|---|---|
-| `code-reviewer` | 全体的なコード品質・正確性・保守性のレビュー |
-| `pr-test-analyzer` | テストカバレッジ・テスト品質の分析 |
-| `silent-failure-hunter` | エラーを握りつぶすコードパターンの検出 |
-| `type-design-analyzer` | 型システムの設計・活用度の評価 |
-| `comment-analyzer` | コメント・ドキュメントの質の評価 |
-| `code-simplifier` | 複雑すぎるコードの簡略化提案 |
+| エージェント            | 説明                                         |
+| ----------------------- | -------------------------------------------- |
+| `code-reviewer`         | 全体的なコード品質・正確性・保守性のレビュー |
+| `pr-test-analyzer`      | テストカバレッジ・テスト品質の分析           |
+| `silent-failure-hunter` | エラーを握りつぶすコードパターンの検出       |
+| `type-design-analyzer`  | 型システムの設計・活用度の評価               |
+| `comment-analyzer`      | コメント・ドキュメントの質の評価             |
+| `code-simplifier`       | 複雑すぎるコードの簡略化提案                 |
 
 ## 推奨ワークフロー
 

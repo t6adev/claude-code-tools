@@ -12,15 +12,15 @@
 
 ## ルーティング基準
 
-| シグナル | ルーティング先 | エージェント |
-|---|---|---|
-| 「ざっと見て」「全体確認」「PR 作成前チェック」| `code-review` | `/code-review:review`（5並列） |
-| 「型」「型設計」「型安全」 | `pr-review-toolkit` | `type-design-analyzer` |
-| 「エラーハンドリング」「サイレント失敗」「例外握りつぶし」 | `pr-review-toolkit` | `silent-failure-hunter` |
-| 「テスト品質」「カバレッジ」「テストが足りない」 | `pr-review-toolkit` | `pr-test-analyzer` |
-| 「コメント」「ドキュメント不足」 | `pr-review-toolkit` | `comment-analyzer` |
-| 「複雑すぎる」「シンプルにしたい」 | `pr-review-toolkit` | `code-simplifier` |
-| 不明 | 1問質問してからルーティング | — |
+| シグナル                                                   | ルーティング先              | エージェント                   |
+| ---------------------------------------------------------- | --------------------------- | ------------------------------ |
+| 「ざっと見て」「全体確認」「PR 作成前チェック」            | `code-review`               | `/code-review:review`（5並列） |
+| 「型」「型設計」「型安全」                                 | `pr-review-toolkit`         | `type-design-analyzer`         |
+| 「エラーハンドリング」「サイレント失敗」「例外握りつぶし」 | `pr-review-toolkit`         | `silent-failure-hunter`        |
+| 「テスト品質」「カバレッジ」「テストが足りない」           | `pr-review-toolkit`         | `pr-test-analyzer`             |
+| 「コメント」「ドキュメント不足」                           | `pr-review-toolkit`         | `comment-analyzer`             |
+| 「複雑すぎる」「シンプルにしたい」                         | `pr-review-toolkit`         | `code-simplifier`              |
+| 不明                                                       | 1問質問してからルーティング | —                              |
 
 ## 動作
 
@@ -32,6 +32,7 @@
 ## 前提
 
 以下のプラグインがインストール済みであること:
+
 - `code-review` (`recommended-plugins/code-review/`)
 - `pr-review-toolkit` (`recommended-plugins/pr-review-toolkit/`)
 

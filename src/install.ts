@@ -40,10 +40,7 @@ if (process.platform === "win32") {
 }
 
 // REPO_DIR: directory containing the package (one level up from this script)
-const REPO_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  ".."
-);
+const REPO_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const FORCE = process.argv.includes("--force");
 
@@ -84,9 +81,7 @@ async function main(): Promise<void> {
   // Guard: prevent installing into the repo itself
   if (!isGlobal && checkIsInsideRepo(process.cwd())) {
     if (!FORCE) {
-      log.error(
-        "claude-code-tools リポジトリ内ではローカルインストールできません。"
-      );
+      log.error("claude-code-tools リポジトリ内ではローカルインストールできません。");
       log.info("--global を選択するか、別のプロジェクトで実行してください。");
       log.info("リポジトリ内へのインストールを強制するには --force を指定してください。");
       process.exit(1);
@@ -208,9 +203,7 @@ async function main(): Promise<void> {
       if (result.action === "copied") copied++;
       else skipped++;
     }
-    s.stop(
-      `Skills: ${copied} 個インストール、${skipped} 個スキップ（計 ${skills.length} 個）`
-    );
+    s.stop(`Skills: ${copied} 個インストール、${skipped} 個スキップ（計 ${skills.length} 個）`);
   }
 
   // Agents
@@ -227,19 +220,14 @@ async function main(): Promise<void> {
       if (result.action === "copied") copied++;
       else skipped++;
     }
-    s.stop(
-      `Agents: ${copied} 個インストール、${skipped} 個スキップ（計 ${agents.length} 個）`
-    );
+    s.stop(`Agents: ${copied} 個インストール、${skipped} 個スキップ（計 ${agents.length} 個）`);
   }
 
   // Plugins
   if (selectedComponents.includes("plugins")) {
     const s = spinner();
     s.start("Recommended Plugins をインストール中...");
-    const plugins = [
-      ...discoverPlugins(REPO_DIR).filter((p) => p.enabled),
-      ...optionalPlugins,
-    ];
+    const plugins = [...discoverPlugins(REPO_DIR).filter((p) => p.enabled), ...optionalPlugins];
     let installed = 0;
     let failed = 0;
     const failedPlugins: string[] = [];
@@ -280,11 +268,9 @@ async function main(): Promise<void> {
       if (result.action === "copied") copied++;
       else skipped++;
     }
-    s.stop(
-      `Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${scripts.length} 個）`
-    );
+    s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${scripts.length} 個）`);
     log.info(
-      `Hook の settings.json 設定は tools/hooks/configs/ を参照して手動でマージしてください。（対象: ${installDir}/settings.json）`
+      `Hook の settings.json 設定は tools/hooks/configs/ を参照して手動でマージしてください。（対象: ${installDir}/settings.json）`,
     );
   }
 
@@ -299,9 +285,7 @@ async function main(): Promise<void> {
     let hasPlaceholder = false;
 
     for (const entry of entries) {
-      const servers = (
-        entry.json as { mcpServers?: Record<string, unknown> }
-      ).mcpServers ?? {};
+      const servers = (entry.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {};
       const result = mergeMcpJson(mcpDstPath, servers, {
         dryRun: dryRun as boolean,
       });
@@ -310,12 +294,10 @@ async function main(): Promise<void> {
       if (result.hasPlaceholder) hasPlaceholder = true;
     }
 
-    s.stop(
-      `MCP: ${merged} 個マージ、${noop} 個スキップ（計 ${entries.length} 個）`
-    );
+    s.stop(`MCP: ${merged} 個マージ、${noop} 個スキップ（計 ${entries.length} 個）`);
     if (hasPlaceholder) {
       log.warn(
-        `~/.claude/.mcp.json の filesystem エントリに "/path/to/allowed/directory" プレースホルダーが含まれています。`
+        `~/.claude/.mcp.json の filesystem エントリに "/path/to/allowed/directory" プレースホルダーが含まれています。`,
       );
       log.warn("実際のパスに手動で書き換えてください。");
     }
@@ -330,21 +312,21 @@ async function main(): Promise<void> {
       "tools",
       "claude-md-templates",
       claudeMdTemplate,
-      "CLAUDE.md"
+      "CLAUDE.md",
     );
     const dst = path.join(process.cwd(), "CLAUDE.md");
     const result = copyFile(templateSrc, dst, { dryRun: dryRun as boolean });
     s.stop(
       result.action === "copied"
         ? `CLAUDE.md を配置しました（テンプレート: ${claudeMdTemplate}）`
-        : "CLAUDE.md は既に存在するためスキップしました"
+        : "CLAUDE.md は既に存在するためスキップしました",
     );
   }
 
   outro(
     dryRun
       ? "ドライラン完了。実際にインストールするには再実行してください。"
-      : "インストール完了！\n  更新するには npx を再実行してください。"
+      : "インストール完了！\n  更新するには npx を再実行してください。",
   );
 }
 

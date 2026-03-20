@@ -1,4 +1,4 @@
 plugin_id: plugin-dev
-registry: anthropics/claude-code   # claude plugin marketplace add <registry>
-channel: claude-code-plugins               # claude plugin install <plugin_id>@<channel>
-enabled: false  # 開発補助ツール。必要な場合は手動でインストール
+registry: anthropics/claude-code # claude plugin marketplace add <registry>
+channel: claude-code-plugins # claude plugin install <plugin_id>@<channel>
+enabled: false # 開発補助ツール。必要な場合は手動でインストール

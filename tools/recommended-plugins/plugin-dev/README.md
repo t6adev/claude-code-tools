@@ -26,23 +26,23 @@ claude plugin install plugin-dev@claude-code-marketplace
 
 ## 提供コマンド / スキル
 
-| コマンド/スキル | 説明 |
-|---|---|
-| `/plugin-dev:create-plugin` | 8フェーズのガイド付きプラグイン作成ワークフロー |
-| `skill-development` | Skill の作成・改善（Progressive Disclosure パターン） |
-| `agent-development` | Agent の作成（AI アシスト生成対応） |
-| `command-development` | スラッシュコマンドの作成 |
-| `hook-development` | Hook の実装・検証（ユーティリティスクリプト付き） |
-| `mcp-integration` | MCP サーバーの統合（stdio/SSE/HTTP/WebSocket） |
-| `plugin-structure` | プラグインのディレクトリ構成・マニフェスト設定 |
-| `plugin-settings` | `.claude/plugin-name.local.md` によるプロジェクト設定 |
+| コマンド/スキル             | 説明                                                  |
+| --------------------------- | ----------------------------------------------------- |
+| `/plugin-dev:create-plugin` | 8フェーズのガイド付きプラグイン作成ワークフロー       |
+| `skill-development`         | Skill の作成・改善（Progressive Disclosure パターン） |
+| `agent-development`         | Agent の作成（AI アシスト生成対応）                   |
+| `command-development`       | スラッシュコマンドの作成                              |
+| `hook-development`          | Hook の実装・検証（ユーティリティスクリプト付き）     |
+| `mcp-integration`           | MCP サーバーの統合（stdio/SSE/HTTP/WebSocket）        |
+| `plugin-structure`          | プラグインのディレクトリ構成・マニフェスト設定        |
+| `plugin-settings`           | `.claude/plugin-name.local.md` によるプロジェクト設定 |
 
 ## このリポジトリでの活用方法
 
-| 作業 | 使うスキル |
-|---|---|
-| 新しい Skill を追加したい | `skill-development` |
-| 新しい Agent を追加したい | `agent-development` |
-| Hook スクリプトを書きたい | `hook-development` |
-| MCP 設定テンプレートを追加したい | `mcp-integration` |
-| 新規プラグインを一から作りたい | `/plugin-dev:create-plugin` |
+| 作業                             | 使うスキル                  |
+| -------------------------------- | --------------------------- |
+| 新しい Skill を追加したい        | `skill-development`         |
+| 新しい Agent を追加したい        | `agent-development`         |
+| Hook スクリプトを書きたい        | `hook-development`          |
+| MCP 設定テンプレートを追加したい | `mcp-integration`           |
+| 新規プラグインを一から作りたい   | `/plugin-dev:create-plugin` |

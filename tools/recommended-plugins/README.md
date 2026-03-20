@@ -5,16 +5,16 @@
 
 ## Plugin 一覧
 
-| Plugin | ソース | 概要 |
-|--------|--------|------|
-| [`commit-commands`](commit-commands/) | anthropics/claude-code | `/commit` などの git workflow 自動化コマンド |
-| [`code-review`](code-review/) | anthropics/claude-code | PR レビューの自動化（parallel agents） |
-| [`pr-review-toolkit`](pr-review-toolkit/) | anthropics/claude-code | 6専門エージェントによる包括的PRレビュー |
-| [`feature-dev`](feature-dev/) | anthropics/claude-code | 7フェーズ体系的フィーチャー開発ワークフロー（大規模機能開発向け） |
-| [`hookify`](hookify/) | anthropics/claude-code | マークダウンルールによるカスタムフック管理 |
-| [`security-guidance`](security-guidance/) | anthropics/claude-code | PreToolUseフックによるセキュリティ監視（9パターン） |
-| [`frontend-design`](frontend-design/) | anthropics/claude-code | 汎用AI美学を避けた本番品質フロントエンドデザイン指針 |
-| [`plugin-dev`](plugin-dev/) | anthropics/claude-plugins-official | Skill・Agent・Hook・MCP 開発を網羅するプラグイン開発ツールキット |
+| Plugin                                    | ソース                             | 概要                                                              |
+| ----------------------------------------- | ---------------------------------- | ----------------------------------------------------------------- |
+| [`commit-commands`](commit-commands/)     | anthropics/claude-code             | `/commit` などの git workflow 自動化コマンド                      |
+| [`code-review`](code-review/)             | anthropics/claude-code             | PR レビューの自動化（parallel agents）                            |
+| [`pr-review-toolkit`](pr-review-toolkit/) | anthropics/claude-code             | 6専門エージェントによる包括的PRレビュー                           |
+| [`feature-dev`](feature-dev/)             | anthropics/claude-code             | 7フェーズ体系的フィーチャー開発ワークフロー（大規模機能開発向け） |
+| [`hookify`](hookify/)                     | anthropics/claude-code             | マークダウンルールによるカスタムフック管理                        |
+| [`security-guidance`](security-guidance/) | anthropics/claude-code             | PreToolUseフックによるセキュリティ監視（9パターン）               |
+| [`frontend-design`](frontend-design/)     | anthropics/claude-code             | 汎用AI美学を避けた本番品質フロントエンドデザイン指針              |
+| [`plugin-dev`](plugin-dev/)               | anthropics/claude-plugins-official | Skill・Agent・Hook・MCP 開発を網羅するプラグイン開発ツールキット  |
 
 ## マーケットプレイスの登録
 
@@ -42,8 +42,8 @@ npx github:t6adev/claude-code-tools
 
 ```yaml
 plugin_id: <plugin-name>
-registry: <owner>/<repo>     # claude plugin marketplace add <registry>
-channel: <channel-name>      # claude plugin install <plugin_id>@<channel>
+registry: <owner>/<repo> # claude plugin marketplace add <registry>
+channel: <channel-name> # claude plugin install <plugin_id>@<channel>
 enabled: true
 ```
 
@@ -60,8 +60,12 @@ enabled: true
 # plugin-name
 
 ## 概要
+
 ## ソース
+
 ## 採用理由
+
 ## インストール
+
 ## 提供コマンド / 機能
 ```

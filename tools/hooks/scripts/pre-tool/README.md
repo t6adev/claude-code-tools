@@ -4,8 +4,8 @@
 
 ## スクリプト一覧
 
-| スクリプト | 説明 |
-|---|---|
+| スクリプト                                     | 説明                                        |
+| ---------------------------------------------- | ------------------------------------------- |
 | [block-dangerous-rm.sh](block-dangerous-rm.sh) | `rm -rf /` など危険な削除コマンドをブロック |
 
 ## stdin の形式
@@ -23,11 +23,11 @@
 
 ## 終了コード
 
-| コード | 意味 |
-|---|---|
-| `0` | 許可（続行） |
-| `1` | 警告（stdout を Claude に渡して続行させるかを判断させる） |
-| `2` | 強制ブロック（ツール実行を中断） |
+| コード | 意味                                                      |
+| ------ | --------------------------------------------------------- |
+| `0`    | 許可（続行）                                              |
+| `1`    | 警告（stdout を Claude に渡して続行させるかを判断させる） |
+| `2`    | 強制ブロック（ツール実行を中断）                          |
 
 ## インストール例
 
@@ -37,13 +37,16 @@ chmod +x ~/.claude/hooks/block-dangerous-rm.sh
 ```
 
 settings.json への追加:
+
 ```json
 {
   "hooks": {
-    "PreToolUse": [{
-      "matcher": "Bash",
-      "hooks": [{"type": "command", "command": "~/.claude/hooks/block-dangerous-rm.sh"}]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/block-dangerous-rm.sh" }]
+      }
+    ]
   }
 }
 ```

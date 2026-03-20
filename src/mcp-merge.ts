@@ -12,7 +12,7 @@ export interface MergeMcpResult {
 export function mergeMcpJson(
   dstPath: string,
   newEntries: McpServers,
-  opts: { dryRun: boolean }
+  opts: { dryRun: boolean },
 ): MergeMcpResult {
   let existing: McpJson = { mcpServers: {} };
 
@@ -29,9 +29,7 @@ export function mergeMcpJson(
     }
   }
 
-  const hasPlaceholder = JSON.stringify(newEntries).includes(
-    "/path/to/allowed/directory"
-  );
+  const hasPlaceholder = JSON.stringify(newEntries).includes("/path/to/allowed/directory");
 
   if (addedKeys.length === 0) {
     return { action: "noop", addedKeys: [], hasPlaceholder };

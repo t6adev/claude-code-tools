@@ -45,12 +45,12 @@ claude plugin install feature-dev@claude-code-plugins  # <plugin_id>@<channel>
 
 ## 提供コマンド / エージェント
 
-| コマンド/エージェント | 説明 |
-|---|---|
-| `/feature-dev` | 7フェーズ開発ワークフローを開始 |
-| `code-explorer` | コードベース探索・既存実装の調査 |
-| `code-architect` | アーキテクチャ設計・技術的判断 |
-| `code-reviewer` | 実装品質の並列レビュー（3並列） |
+| コマンド/エージェント | 説明                             |
+| --------------------- | -------------------------------- |
+| `/feature-dev`        | 7フェーズ開発ワークフローを開始  |
+| `code-explorer`       | コードベース探索・既存実装の調査 |
+| `code-architect`      | アーキテクチャ設計・技術的判断   |
+| `code-reviewer`       | 実装品質の並列レビュー（3並列）  |
 
 ## 7フェーズワークフロー
 

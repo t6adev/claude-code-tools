@@ -18,6 +18,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, TodoWrite
 
 ```markdown
 ## [タスク名] - YYYY-MM-DD
+
 - [ ] ステップ1: 具体的な作業内容
 - [ ] ステップ2: 具体的な作業内容
 - [ ] 検証: テスト実行・動作確認

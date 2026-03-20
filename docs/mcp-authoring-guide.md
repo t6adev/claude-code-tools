@@ -20,6 +20,7 @@ tools/mcp/<server-name>/
 ```
 
 `mcp-integration` スキルが提供するもの:
+
 - サーバータイプ別の設定例（stdio / SSE / HTTP / WebSocket）
 - `.mcp.json` vs `plugin.json` の使い分け
 - OAuth・トークン・環境変数による認証パターン

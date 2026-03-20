@@ -142,10 +142,7 @@ export function discoverMcpEntries(repoDir: string): McpEntryInfo[] {
     const mcpJsonPath = path.join(mcpDir, serverDir, ".mcp.json");
     if (!fs.existsSync(mcpJsonPath)) continue;
 
-    const json = JSON.parse(fs.readFileSync(mcpJsonPath, "utf-8")) as Record<
-      string,
-      unknown
-    >;
+    const json = JSON.parse(fs.readFileSync(mcpJsonPath, "utf-8")) as Record<string, unknown>;
     results.push({ serverDir, srcPath: mcpJsonPath, json });
   }
 

@@ -10,11 +10,13 @@ argument-hint: "[review intent or concern]"
 ## ツール概要
 
 ### code-review（`/code-review:review`）
+
 - **性質**: 網羅的・並列スキャン
 - **エージェント**: セキュリティ / パフォーマンス / 可読性 / テスト / アーキテクチャ（5並列）
 - **適した場面**: PR 作成時のゲートチェック、初見スキャン、全体的な品質確認
 
 ### pr-review-toolkit（6専門エージェント）
+
 - **性質**: 特定観点への深掘り
 - **エージェント**:
   - `code-reviewer` — 全体的なコード品質・正確性
@@ -36,11 +38,13 @@ argument-hint: "[review intent or concern]"
 ### ステップ 2: シグナル判定
 
 **code-review を選ぶシグナル:**
+
 - 「ざっと見て」「quick scan」「全体確認」「PR 作成前チェック」
 - 特定観点への言及がない
 - 「まず」「最初に」などの初見レビューを示す語句
 
 **pr-review-toolkit を選ぶシグナル（エージェント対応）:**
+
 - 「型」「型設計」「型安全」→ `type-design-analyzer`
 - 「エラーハンドリング」「例外」「握りつぶし」「サイレント失敗」→ `silent-failure-hunter`
 - 「テスト品質」「カバレッジ」「テストが足りない」→ `pr-test-analyzer`

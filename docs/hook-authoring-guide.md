@@ -13,10 +13,10 @@ tools/hooks/configs/
 
 ## イベントタイプ
 
-| ディレクトリ | イベント |
-|---|---|
-| `pre-tool/` | `PreToolUse`（ツール実行前） |
-| `post-tool/` | `PostToolUse` / `Stop` |
+| ディレクトリ | イベント                     |
+| ------------ | ---------------------------- |
+| `pre-tool/`  | `PreToolUse`（ツール実行前） |
+| `post-tool/` | `PostToolUse` / `Stop`       |
 
 ## スクリプトの要件
 
@@ -37,6 +37,7 @@ tools/hooks/configs/
 ```
 
 `hook-development` スキルが提供するもの:
+
 - Prompt-based hooks（LLM による判断）と Command hooks（確定的な検証）の使い分け
 - 全イベントタイプのリファレンス（PreToolUse, PostToolUse, Stop, SessionStart など）
 - `validate-hook-schema.sh`・`test-hook.sh`・`hook-linter.sh` の検証ユーティリティ

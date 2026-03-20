@@ -4,9 +4,9 @@
 
 ## スニペット一覧
 
-| ファイル | 説明 |
-|---|---|
-| [safety-rails.json](safety-rails.json) | 危険な rm コマンドをブロック |
+| ファイル                                   | 説明                         |
+| ------------------------------------------ | ---------------------------- |
+| [safety-rails.json](safety-rails.json)     | 危険な rm コマンドをブロック |
 | [notify-on-stop.json](notify-on-stop.json) | 応答完了時にデスクトップ通知 |
 
 ## 使い方
@@ -21,13 +21,13 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{"type": "command", "command": "~/.claude/hooks/block-dangerous-rm.sh"}]
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/block-dangerous-rm.sh" }]
       }
     ],
     "Stop": [
       {
         "matcher": "",
-        "hooks": [{"type": "command", "command": "~/.claude/hooks/notify-on-stop.sh"}]
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/notify-on-stop.sh" }]
       }
     ]
   }

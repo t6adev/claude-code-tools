@@ -6,11 +6,7 @@ export interface CopyResult {
   dst: string;
 }
 
-export function copyDir(
-  src: string,
-  dst: string,
-  opts: { dryRun: boolean }
-): CopyResult {
+export function copyDir(src: string, dst: string, opts: { dryRun: boolean }): CopyResult {
   if (fs.existsSync(dst)) {
     return { action: "skipped", dst };
   }
@@ -26,7 +22,7 @@ export function copyDir(
 export function copyFile(
   src: string,
   dst: string,
-  opts: { dryRun: boolean; executable?: boolean }
+  opts: { dryRun: boolean; executable?: boolean },
 ): CopyResult {
   if (fs.existsSync(dst)) {
     return { action: "skipped", dst };

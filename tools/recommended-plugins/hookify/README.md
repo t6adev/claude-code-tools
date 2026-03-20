@@ -31,19 +31,19 @@ claude plugin install hookify@claude-code-plugins  # <plugin_id>@<channel>
 
 ## 提供コマンド
 
-| コマンド | 説明 |
-|---|---|
-| `/hookify` | 新しいフックルールを作成 |
-| `/hookify:list` | 現在のフックルール一覧を表示 |
-| `/hookify:configure` | 既存ルールを設定・編集 |
-| `/hookify:help` | ヘルプを表示 |
+| コマンド             | 説明                         |
+| -------------------- | ---------------------------- |
+| `/hookify`           | 新しいフックルールを作成     |
+| `/hookify:list`      | 現在のフックルール一覧を表示 |
+| `/hookify:configure` | 既存ルールを設定・編集       |
+| `/hookify:help`      | ヘルプを表示                 |
 
 ## ルールの形式
 
 ```markdown
 ---
 trigger: "pattern to watch for"
-action: warn  # または block
+action: warn # または block
 ---
 
 ルールの説明とガイダンス

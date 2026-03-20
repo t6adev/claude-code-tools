@@ -10,12 +10,12 @@ tools/agents/<category>/<agent-name>/
 
 ## カテゴリ一覧
 
-| カテゴリ | 用途 |
-|---|---|
-| `review/` | コードレビュー・監査 |
-| `testing/` | テスト生成・品質保証 |
-| `docs/` | ドキュメント作成 |
-| `ops/` | デプロイ・インフラ操作 |
+| カテゴリ   | 用途                   |
+| ---------- | ---------------------- |
+| `review/`  | コードレビュー・監査   |
+| `testing/` | テスト生成・品質保証   |
+| `docs/`    | ドキュメント作成       |
+| `ops/`     | デプロイ・インフラ操作 |
 
 ## ファイル命名規則
 
@@ -44,27 +44,29 @@ model: sonnet
 
 ## フロントマター フィールド
 
-| フィールド | 必須 | 説明 |
-|---|---|---|
-| `name` | 必須 | エージェント識別子。ディレクトリ名と一致させる |
-| `description` | 必須 | 親エージェントがこのエージェントに委譲する際の判断基準。英語で書く |
-| `tools` | 任意 | 許可するツール。省略すると全ツール継承 |
-| `disallowedTools` | 任意 | 明示的に禁止するツール |
-| `model` | 任意 | `sonnet`（デフォルト）、`opus`、`haiku`、またはモデル ID |
-| `maxTurns` | 任意 | 最大ターン数 |
-| `permissionMode` | 任意 | `default`、`acceptEdits`、`dontAsk`、`bypassPermissions`、`plan` |
+| フィールド        | 必須 | 説明                                                               |
+| ----------------- | ---- | ------------------------------------------------------------------ |
+| `name`            | 必須 | エージェント識別子。ディレクトリ名と一致させる                     |
+| `description`     | 必須 | 親エージェントがこのエージェントに委譲する際の判断基準。英語で書く |
+| `tools`           | 任意 | 許可するツール。省略すると全ツール継承                             |
+| `disallowedTools` | 任意 | 明示的に禁止するツール                                             |
+| `model`           | 任意 | `sonnet`（デフォルト）、`opus`、`haiku`、またはモデル ID           |
+| `maxTurns`        | 任意 | 最大ターン数                                                       |
+| `permissionMode`  | 任意 | `default`、`acceptEdits`、`dontAsk`、`bypassPermissions`、`plan`   |
 
 ## 良い `description` の書き方
 
 `description` は親エージェントがサブエージェントに委譲するかを判断する基準です。
 
 **良い例:**
+
 ```
 Expert code reviewer specializing in security, performance, and maintainability.
 Use when reviewing pull requests or code changes before merging.
 ```
 
 **悪い例:**
+
 ```
 Reviews code
 ```
@@ -124,6 +126,7 @@ model: sonnet
 ```
 
 `agent-development` スキルが提供するもの:
+
 - `<example>` ブロックを使った信頼性の高いトリガー設計
 - システムプロンプトのデザインパターン（分析・生成・バリデーション・オーケストレーション）
 - AI アシスト生成（Claude Code 公式の agent-creation-prompt を使ったワークフロー）

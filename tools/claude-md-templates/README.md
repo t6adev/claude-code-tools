@@ -4,13 +4,13 @@
 
 ## 利用可能なテンプレート
 
-| テンプレート | 用途 |
-|---|---|
-| [base](base/) | 最小限の汎用ベース。他テンプレートの出発点 |
-| [typescript-node](typescript-node/) | TypeScript / Node.js サービス・CLI |
-| [react-app](react-app/) | React + TypeScript フロントエンド（Vite / Next.js） |
-| [python-service](python-service/) | Python サービス（FastAPI / Django） |
-| [go-service](go-service/) | Go サービス |
+| テンプレート                        | 用途                                                |
+| ----------------------------------- | --------------------------------------------------- |
+| [base](base/)                       | 最小限の汎用ベース。他テンプレートの出発点          |
+| [typescript-node](typescript-node/) | TypeScript / Node.js サービス・CLI                  |
+| [react-app](react-app/)             | React + TypeScript フロントエンド（Vite / Next.js） |
+| [python-service](python-service/)   | Python サービス（FastAPI / Django）                 |
+| [go-service](go-service/)           | Go サービス                                         |
 
 ## 使い方
 

@@ -18,11 +18,10 @@ function claudeCliAvailable(): boolean {
 
 function isMarketplaceRegistered(registry: string): boolean {
   try {
-    const output = execFileSync(
-      "claude",
-      ["plugin", "marketplace", "list"],
-      { stdio: "pipe", encoding: "utf-8" }
-    );
+    const output = execFileSync("claude", ["plugin", "marketplace", "list"], {
+      stdio: "pipe",
+      encoding: "utf-8",
+    });
     return output.includes(registry);
   } catch {
     return false;
@@ -42,7 +41,7 @@ function registerMarketplace(registry: string): boolean {
 
 export function installPlugin(
   plugin: PluginInfo,
-  opts: { scope: "local" | "global"; dryRun: boolean }
+  opts: { scope: "local" | "global"; dryRun: boolean },
 ): PluginInstallResult {
   if (!plugin.enabled) {
     return { pluginId: plugin.pluginId, action: "skipped", reason: "disabled" };

@@ -32,8 +32,8 @@ claude plugin install commit-commands@claude-code-plugins  # <plugin_id>@<channe
 
 ## 提供コマンド / 機能
 
-| コマンド | 説明 |
-|----------|------|
+| コマンド  | 説明                                                   |
+| --------- | ------------------------------------------------------ |
 | `/commit` | ステージ済み変更を Conventional Commits 形式でコミット |
-| `/push` | コミットしてリモートへプッシュ |
-| `/pr` | PR を作成 |
+| `/push`   | コミットしてリモートへプッシュ                         |
+| `/pr`     | PR を作成                                              |
