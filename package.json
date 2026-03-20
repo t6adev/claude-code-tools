@@ -15,6 +15,7 @@
     "dev": "tsx installer/install.ts",
     "prepare": "tsc",
     "check": "pnpm run --parallel \"/^check:.*/\"",
+    "check:types": "tsc --noEmit",
     "check:lint": "oxlint",
     "check:fmt": "oxfmt --check",
     "fix": "pnpm run --parallel \"/^fix:.*/\"",
