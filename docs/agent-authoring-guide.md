@@ -113,6 +113,22 @@ model: sonnet
 問題の説明と修正案
 ```
 
+## plugin-dev を活用する
+
+[`plugin-dev`](../tools/recommended-plugins/plugin-dev/) プラグインをインストールすると、Agent 作成を AI がガイドしてくれます。
+
+```
+# Agent 作成の相談
+「新しいエージェントを作りたい。description の書き方は？」
+→ plugin-dev の agent-development スキルが自動でロードされる
+```
+
+`agent-development` スキルが提供するもの:
+- `<example>` ブロックを使った信頼性の高いトリガー設計
+- システムプロンプトのデザインパターン（分析・生成・バリデーション・オーケストレーション）
+- AI アシスト生成（Claude Code 公式の agent-creation-prompt を使ったワークフロー）
+- `validate-agent.sh` による検証ユーティリティ
+
 ## ミニマムチェックリスト
 
 - [ ] ファイル名がディレクトリ名と一致している

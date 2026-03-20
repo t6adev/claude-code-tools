@@ -120,6 +120,21 @@ argument-hint: "[scope]"
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com> をメッセージに含める。
 ```
 
+## plugin-dev を活用する
+
+[`plugin-dev`](../tools/recommended-plugins/plugin-dev/) プラグインをインストールすると、Skill 作成を AI がガイドしてくれます。
+
+```
+# Skill 作成の相談
+「新しいスキルを追加したい。description の書き方を教えて」
+→ plugin-dev の skill-development スキルが自動でロードされる
+```
+
+`skill-development` スキルが提供するもの:
+- Progressive Disclosure パターン（メタデータ → SKILL.md → リソース）の実践方法
+- 強いトリガーフレーズの書き方
+- `skill-creator` メソドロジーに基づいたワークフロー
+
 ## ミニマムチェックリスト
 
 - [ ] `name` がディレクトリ名と一致している
