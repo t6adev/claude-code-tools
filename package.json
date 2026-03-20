@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/install.ts",
+    "dev": "tsx installer/install.ts",
     "prepare": "tsc",
     "check": "pnpm run --parallel \"/^check:.*/\"",
     "check:lint": "oxlint",
