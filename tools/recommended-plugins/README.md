@@ -16,6 +16,14 @@
 | [`frontend-design`](frontend-design/) | anthropics/claude-code | 汎用AI美学を避けた本番品質フロントエンドデザイン指針 |
 | [`plugin-dev`](plugin-dev/) | anthropics/claude-code | Claude Codeプラグイン開発ツールキット |
 
+## マーケットプレイスの登録
+
+プラグインをインストールする前に、以下のコマンドのように必要なマーケットプレイスを登録してください：
+
+```bash
+claude plugin marketplace add <marketplace-name>
+```
+
 ## 一括インストール
 
 リポジトリルートの `install.sh` を使うと、skills・agents・推薦 plugins を一括でインストールできます。

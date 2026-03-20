@@ -191,15 +191,15 @@ install_plugins() {
   $GLOBAL || scope_flag="--scope project"
 
   # マーケットプレイスが未登録の場合は追加を試みる
-  if ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+  if ! claude plugin marketplace list 2>/dev/null | grep -q "anthropics/claude-code"; then
     if $DRY_RUN; then
-      echo "    [dry-run] claude plugin marketplace add anthropics/claude-plugins-official"
+      echo "    [dry-run] claude plugin marketplace add anthropics/claude-code"
     else
-      echo "  adding marketplace: anthropics/claude-plugins-official ..."
-      claude plugin marketplace add anthropics/claude-plugins-official 2>&1 || \
+      echo "  adding marketplace: anthropics/claude-code ..."
+      claude plugin marketplace add anthropics/claude-code 2>&1 || \
         echo "  [warning] マーケットプレイスの追加に失敗しました。plugins インストールをスキップします。"
       # マーケットプレイス追加が失敗した場合はスキップ
-      if ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+      if ! claude plugin marketplace list 2>/dev/null | grep -q "anthropics/claude-code"; then
         echo "            手動でインストールしてください: tools/recommended-plugins/README.md を参照"
         return
       fi
@@ -207,16 +207,16 @@ install_plugins() {
   fi
 
   # 推薦 plugin リスト
-  # ソース: https://github.com/anthropics/claude-plugins-official/tree/main/plugins
+  # ソース: https://github.com/anthropics/claude-code/tree/main/plugins
   local plugins=(
-    "commit-commands@claude-plugins-official"
-    "code-review@claude-plugins-official"
-    "pr-review-toolkit@claude-plugins-official"
-    "feature-dev@claude-plugins-official"
-    "hookify@claude-plugins-official"
-    "security-guidance@claude-plugins-official"
-    "frontend-design@claude-plugins-official"
-    "plugin-dev@claude-plugins-official"
+    "commit-commands@anthropics/claude-code"
+    "code-review@anthropics/claude-code"
+    "pr-review-toolkit@anthropics/claude-code"
+    "feature-dev@anthropics/claude-code"
+    "hookify@anthropics/claude-code"
+    "security-guidance@anthropics/claude-code"
+    "frontend-design@anthropics/claude-code"
+    "plugin-dev@anthropics/claude-code"
   )
 
   for plugin in "${plugins[@]}"; do

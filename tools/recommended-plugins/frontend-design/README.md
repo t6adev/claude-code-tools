@@ -17,6 +17,7 @@
 ## インストール
 
 ```bash
+claude plugin marketplace add anthropics/claude-code
 claude plugin install anthropics/claude-code/plugins/frontend-design
 ```
 
