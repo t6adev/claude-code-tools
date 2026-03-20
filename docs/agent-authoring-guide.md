@@ -3,7 +3,7 @@
 ## ファイル構成
 
 ```
-project/agents/<category>/<agent-name>/
+tools/agents/<category>/<agent-name>/
 ├── <agent-name>.md    # 機械可読な定義（必須・ファイル名はディレクトリ名と一致）
 └── README.md          # 人間向けドキュメント（必須）
 ```
@@ -119,6 +119,6 @@ model: sonnet
 - [ ] `description` が英語で役割と使用文脈を含んでいる
 - [ ] `tools` が必要最小限に絞られている（特に書き込み系は慎重に）
 - [ ] README.md が添付されている
-- [ ] `project/agents/README.md` のテーブルに追記している
+- [ ] `tools/agents/README.md` のテーブルに追記している
 
 詳細は [pr-checklist.md](pr-checklist.md) を参照。

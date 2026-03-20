@@ -3,11 +3,11 @@
 ## ファイル構成
 
 ```
-project/claude-md-templates/<project-type>/
+tools/claude-md-templates/<project-type>/
 └── CLAUDE.md
 ```
 
 ## 追加後の手順
 
-1. `project/claude-md-templates/README.md` のテーブルに追記する
+1. `tools/claude-md-templates/README.md` のテーブルに追記する
 2. PR を作成する（[pr-checklist.md](pr-checklist.md) 参照）

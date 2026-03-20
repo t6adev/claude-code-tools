@@ -9,7 +9,7 @@
 - スキル名 = スラッシュコマンド名 = ディレクトリ名
 
 ```
-project/skills/git/commit/     ← ディレクトリ名 "commit"
+tools/skills/git/commit/     ← ディレクトリ名 "commit"
                 └── SKILL.md   ← name: commit
 ```
 
@@ -18,6 +18,6 @@ project/skills/git/commit/     ← ディレクトリ名 "commit"
 - エージェント定義ファイル名 = ディレクトリ名 + `.md`
 
 ```
-project/agents/review/code-reviewer/     ← ディレクトリ名 "code-reviewer"
+tools/agents/review/code-reviewer/     ← ディレクトリ名 "code-reviewer"
                        └── code-reviewer.md   ← ファイル名もディレクトリ名と一致
 ```

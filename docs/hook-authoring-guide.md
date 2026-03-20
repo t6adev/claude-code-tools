@@ -3,11 +3,11 @@
 ## ファイル構成
 
 ```
-global/hooks/scripts/<event-type>/
+tools/hooks/scripts/<event-type>/
 ├── <script-name>.sh    # 実行スクリプト（必須）
 └── README.md           # スクリプト一覧（更新する）
 
-global/hooks/configs/
+tools/hooks/configs/
 └── <preset-name>.json  # settings.json スニペット（任意）
 ```
 
@@ -29,6 +29,6 @@ global/hooks/configs/
 ## 追加後の手順
 
 1. `chmod +x <script-name>.sh` で実行権限を付与する
-2. `global/hooks/scripts/<event>/README.md` のテーブルに追記する
-3. 設定スニペットが必要なら `global/hooks/configs/<name>.json` を追加する
+2. `tools/hooks/scripts/<event>/README.md` のテーブルに追記する
+3. 設定スニペットが必要なら `tools/hooks/configs/<name>.json` を追加する
 4. PR を作成する（[pr-checklist.md](pr-checklist.md) 参照）

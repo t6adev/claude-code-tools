@@ -8,7 +8,7 @@
 #   ./install.sh --global                  # ~/.claude/ に skills + agents をインストール、plugins も追加
 #   ./install.sh --global --add-hooks      # さらに hooks を追加
 #   ./install.sh --global --add-mcp        # さらに mcp を追加
-#   ./install.sh --global --add-hooks --add-mcp  # global/ 全て追加
+#   ./install.sh --global --add-hooks --add-mcp  # tools/ 全て追加
 #   ./install.sh --dry-run                 # 実行内容を確認するだけ（変更なし）
 #
 # インストール先（デフォルト）:
@@ -88,7 +88,7 @@ install_skills() {
   info "Skills をインストール中..."
   run "mkdir -p \"$INSTALL_DIR/skills\""
 
-  for skill_path in "$REPO_DIR"/project/skills/*/*; do
+  for skill_path in "$REPO_DIR"/tools/skills/*/*; do
     [ -d "$skill_path" ] || continue
     local skill_name
     skill_name="$(basename "$skill_path")"
@@ -101,7 +101,7 @@ install_agents() {
   info "Agents をインストール中..."
   run "mkdir -p \"$INSTALL_DIR/agents\""
 
-  for agent_path in "$REPO_DIR"/project/agents/*/*; do
+  for agent_path in "$REPO_DIR"/tools/agents/*/*; do
     [ -d "$agent_path" ] || continue
     local agent_name
     agent_name="$(basename "$agent_path")"
@@ -114,9 +114,9 @@ install_hooks() {
   info "Hooks をインストール中..."
   run "mkdir -p ~/.claude/hooks"
 
-  local hooks_scripts_dir="$REPO_DIR/global/hooks/scripts"
+  local hooks_scripts_dir="$REPO_DIR/tools/hooks/scripts"
   if [ ! -d "$hooks_scripts_dir" ]; then
-    log "skip: global/hooks/scripts/ が見つかりません"
+    log "skip: tools/hooks/scripts/ が見つかりません"
     return
   fi
 
@@ -144,12 +144,12 @@ install_mcp() {
 
   if ! command -v jq &>/dev/null; then
     echo "  [warning] jq コマンドが見つかりません。mcp のインストールをスキップします。"
-    echo "            手動でインストールしてください: global/mcp/README.md を参照"
+    echo "            手動でインストールしてください: tools/mcp/README.md を参照"
     return
   fi
 
   local dst="$HOME/.claude/.mcp.json"
-  local mcp_dir="$REPO_DIR/global/mcp"
+  local mcp_dir="$REPO_DIR/tools/mcp"
 
   for mcp_src in "$mcp_dir"/*/.mcp.json; do
     [ -f "$mcp_src" ] || continue
@@ -183,9 +183,12 @@ install_plugins() {
 
   if ! command -v claude &>/dev/null; then
     echo "  [warning] claude コマンドが見つかりません。plugins のインストールをスキップします。"
-    echo "            手動でインストールしてください: project/recommended-plugins/README.md を参照"
+    echo "            手動でインストールしてください: tools/recommended-plugins/README.md を参照"
     return
   fi
+
+  local scope_flag=""
+  $GLOBAL || scope_flag="--scope project"
 
   # 推薦 plugin リスト
   # ソース: https://github.com/anthropics/claude-plugins-official/tree/main/plugins
@@ -203,10 +206,10 @@ install_plugins() {
   for plugin in "${plugins[@]}"; do
     local plugin_name="${plugin%@*}"
     if $DRY_RUN; then
-      echo "    [dry-run] claude plugin install $plugin"
+      echo "    [dry-run] claude plugin install $scope_flag $plugin"
     else
       echo "  installing $plugin_name ..."
-      claude plugin install "$plugin" || echo "  [warning] $plugin_name のインストールに失敗しました"
+      claude plugin install $scope_flag "$plugin" || echo "  [warning] $plugin_name のインストールに失敗しました"
     fi
   done
 }
@@ -214,13 +217,13 @@ install_plugins() {
 # --- CLAUDE.md ---
 install_claude_md() {
   local template="$PROJECT_TEMPLATE"
-  local template_src="$REPO_DIR/project/claude-md-templates/$template/CLAUDE.md"
+  local template_src="$REPO_DIR/tools/claude-md-templates/$template/CLAUDE.md"
 
   # テンプレートの存在確認
   if [ ! -f "$template_src" ]; then
-    echo "  [error] テンプレートが見つかりません: project/claude-md-templates/$template/CLAUDE.md"
+    echo "  [error] テンプレートが見つかりません: tools/claude-md-templates/$template/CLAUDE.md"
     echo "  利用可能なテンプレート:"
-    for t in "$REPO_DIR"/project/claude-md-templates/*/; do
+    for t in "$REPO_DIR"/tools/claude-md-templates/*/; do
       [ -f "$t/CLAUDE.md" ] && echo "    - $(basename "$t")"
     done
     exit 1
@@ -256,6 +259,7 @@ else
 
   install_skills
   install_agents
+  install_plugins
   $INSTALL_CLAUDE_MD && install_claude_md
 fi
 
