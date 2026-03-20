@@ -209,14 +209,14 @@ install_plugins() {
   # 推薦 plugin リスト
   # ソース: https://github.com/anthropics/claude-code/tree/main/plugins
   local plugins=(
-    "commit-commands@anthropics/claude-code"
-    "code-review@anthropics/claude-code"
-    "pr-review-toolkit@anthropics/claude-code"
-    "feature-dev@anthropics/claude-code"
-    "hookify@anthropics/claude-code"
-    "security-guidance@anthropics/claude-code"
-    "frontend-design@anthropics/claude-code"
-    "plugin-dev@anthropics/claude-code"
+    "commit-commands@claude-code-plugins"
+    "code-review@claude-code-plugins"
+    "pr-review-toolkit@claude-code-plugins"
+    "feature-dev@claude-code-plugins"
+    "hookify@claude-code-plugins"
+    "security-guidance@claude-code-plugins"
+    "frontend-design@claude-code-plugins"
+    "plugin-dev@claude-code-plugins"
   )
 
   for plugin in "${plugins[@]}"; do

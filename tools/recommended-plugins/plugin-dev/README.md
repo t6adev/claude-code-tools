@@ -18,7 +18,7 @@ Claude Codeプラグイン開発専用のツールキット。フック・MCP統
 
 ```bash
 claude plugin marketplace add anthropics/claude-code
-claude plugin install anthropics/claude-code/plugins/plugin-dev
+claude plugin install plugin-dev@claude-code-plugins
 ```
 
 ## 提供コマンド / スキル

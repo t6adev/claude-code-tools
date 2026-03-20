@@ -18,7 +18,7 @@
 
 ```bash
 claude plugin marketplace add anthropics/claude-code
-claude plugin install anthropics/claude-code/plugins/hookify
+claude plugin install hookify@claude-code-plugins
 ```
 
 ## 提供コマンド

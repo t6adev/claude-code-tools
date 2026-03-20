@@ -18,7 +18,7 @@
 
 ```bash
 claude plugin marketplace add anthropics/claude-code
-claude plugin install anthropics/claude-code/plugins/pr-review-toolkit
+claude plugin install pr-review-toolkit@claude-code-plugins
 ```
 
 ## 提供エージェント

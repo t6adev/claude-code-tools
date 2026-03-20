@@ -18,7 +18,7 @@ PreToolUseフックを通じて9つのセキュリティパターンを監視す
 
 ```bash
 claude plugin marketplace add anthropics/claude-code
-claude plugin install anthropics/claude-code/plugins/security-guidance
+claude plugin install security-guidance@claude-code-plugins
 ```
 
 ## 提供機能

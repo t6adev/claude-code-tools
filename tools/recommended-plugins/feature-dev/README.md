@@ -32,7 +32,7 @@
 
 ```bash
 claude plugin marketplace add anthropics/claude-code
-claude plugin install anthropics/claude-code/plugins/feature-dev
+claude plugin install feature-dev@claude-code-plugins
 ```
 
 ## 提供コマンド / エージェント
