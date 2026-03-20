@@ -132,6 +132,33 @@ function collectShScripts(dir: string, results: HookScriptInfo[]): void {
   }
 }
 
+export interface HookConfigInfo {
+  name: string;
+  srcPath: string;
+  hooks: Record<string, unknown>;
+}
+
+export function discoverHookConfigs(repoDir: string): HookConfigInfo[] {
+  const configsDir = path.join(repoDir, "tools", "hooks", "configs");
+  const results: HookConfigInfo[] = [];
+
+  if (!fs.existsSync(configsDir)) return results;
+
+  for (const entry of fs.readdirSync(configsDir)) {
+    if (!entry.endsWith(".json")) continue;
+    const srcPath = path.join(configsDir, entry);
+    const json = JSON.parse(fs.readFileSync(srcPath, "utf-8")) as Record<string, unknown>;
+    if (!json.hooks) continue;
+    results.push({
+      name: entry.replace(/\.json$/, ""),
+      srcPath,
+      hooks: json.hooks as Record<string, unknown>,
+    });
+  }
+
+  return results;
+}
+
 export function discoverMcpEntries(repoDir: string): McpEntryInfo[] {
   const mcpDir = path.join(repoDir, "tools", "mcp");
   const results: McpEntryInfo[] = [];

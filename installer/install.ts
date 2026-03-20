@@ -18,12 +18,14 @@ import {
   discoverAgents,
   discoverPlugins,
   discoverHookScripts,
+  discoverHookConfigs,
   discoverMcpEntries,
   discoverClaudeMdTemplates,
   type PluginInfo,
 } from "./discover.js";
 import { copyDir, copyFile, ensureDir } from "./copy.js";
 import { mergeMcpJson } from "./mcp-merge.js";
+import { mergeSettingsHooks, type AddedEntry } from "./settings-merge.js";
 import { installPlugin } from "./plugins.js";
 
 // Node.js version check
@@ -250,7 +252,9 @@ async function main(): Promise<void> {
     }
   }
 
-  // Hooks (global only)
+  // Hooks
+  const hooksMergeLog: AddedEntry[] = [];
+  let hookSettingsFile: string | null = null;
   if (selectedComponents.includes("hooks")) {
     const s = spinner();
     s.start("Hooks をインストール中...");
@@ -269,9 +273,54 @@ async function main(): Promise<void> {
       else skipped++;
     }
     s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${scripts.length} 個）`);
-    log.info(
-      `Hook の settings.json 設定は tools/hooks/configs/ を参照して手動でマージしてください。（対象: ${installDir}/settings.json）`,
-    );
+
+    // Merge hook configs into settings file
+    const hookConfigs = discoverHookConfigs(REPO_DIR);
+    if (hookConfigs.length > 0) {
+      const settingsTarget = await select({
+        message: "Hook configs を settings にマージします。対象ファイルを選んでください",
+        options: [
+          {
+            value: "settings.json",
+            label: "settings.json",
+            hint: `${installDir}/settings.json（プロジェクト共有）`,
+          },
+          {
+            value: "settings.local.json",
+            label: "settings.local.json",
+            hint: `${installDir}/settings.local.json（個人設定・gitignore 推奨）`,
+          },
+        ],
+      });
+
+      if (isCancel(settingsTarget)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+
+      hookSettingsFile = settingsTarget as string;
+      const settingsDstPath = path.join(installDir, hookSettingsFile);
+      const ms = spinner();
+      ms.start("Hook configs をマージ中...");
+
+      for (const config of hookConfigs) {
+        const result = mergeSettingsHooks(
+          settingsDstPath,
+          config.hooks as Record<
+            string,
+            Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
+          >,
+          { dryRun: dryRun as boolean },
+        );
+        hooksMergeLog.push(...result.addedEntries);
+      }
+
+      if (hooksMergeLog.length > 0) {
+        ms.stop(`Hook configs をマージしました (${hookSettingsFile})`);
+      } else {
+        ms.stop(`Hook configs: 変更なし（全て既存のエントリと重複）`);
+      }
+    }
   }
 
   // MCP (global only)
@@ -321,6 +370,14 @@ async function main(): Promise<void> {
         ? `CLAUDE.md を配置しました（テンプレート: ${claudeMdTemplate}）`
         : "CLAUDE.md は既に存在するためスキップしました",
     );
+  }
+
+  // Show hook config merge summary
+  if (hooksMergeLog.length > 0 && hookSettingsFile) {
+    log.info(`Hook configs の変更内容 (${hookSettingsFile}):`);
+    for (const entry of hooksMergeLog) {
+      log.info(`  + ${entry.event}: ${entry.command}`);
+    }
   }
 
   outro(
