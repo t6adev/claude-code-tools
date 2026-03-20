@@ -171,9 +171,9 @@ async function main(): Promise<void> {
         process.exit(0);
       }
       const selectedIds = selected as string[];
-      optionalPlugins = optionalCandidates.filter((p) =>
-        selectedIds.includes(p.pluginId)
-      );
+      optionalPlugins = optionalCandidates
+        .filter((p) => selectedIds.includes(p.pluginId))
+        .map((p) => ({ ...p, enabled: true }));
     }
   }
 
