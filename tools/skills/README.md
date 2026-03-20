@@ -2,6 +2,12 @@
 
 スラッシュコマンドの一覧です。
 
+## git
+
+| スキル                            | コマンド        | 説明                                                                 |
+| --------------------------------- | --------------- | -------------------------------------------------------------------- |
+| [pre-pr-check](git/pre-pr-check/) | `/pre-pr-check` | PR作成前に検証コマンド・コミット形式・ドキュメント更新を一括チェック |
+
 ## code
 
 | スキル                                         | コマンド                               | 説明                                                                             |
@@ -11,6 +17,14 @@
 | [node-project-setup](code/node-project-setup/) | `/node-project-setup [directory or .]` | pnpm・TypeScript・並列 check パターンで Node.js プロジェクトを設定               |
 | [start-webapp](code/start-webapp/)             | `/start-webapp`                        | 新規Webアプリの立ち上げウィザード（ヒアリング→設計→タスク化→GitHub Project登録） |
 | [implement-task](code/implement-task/)         | `/implement-task [issue-url\|#number]` | GitHub Issue を起点に実装・検証・PR作成まで一貫して実行                          |
+| [debug-assist](code/debug-assist/)             | `/debug-assist [error-message]`        | エラー・スタックトレースを解析して原因仮説と修正方針を提示                       |
+| [impact-analysis](code/impact-analysis/)       | `/impact-analysis [file\|symbol]`      | ファイル・シンボルの変更前に影響を受ける依存元とテストを列挙                     |
+
+## docs
+
+| スキル                     | コマンド                          | 説明                                                            |
+| -------------------------- | --------------------------------- | --------------------------------------------------------------- |
+| [doc-sync](docs/doc-sync/) | `/doc-sync [feature-description]` | 実装変更に合わせて CLAUDE.md・architecture.md・README.md を更新 |
 
 ## meta
 
