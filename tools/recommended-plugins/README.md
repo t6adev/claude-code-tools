@@ -14,7 +14,6 @@
 | [`hookify`](hookify/) | anthropics/claude-code | マークダウンルールによるカスタムフック管理 |
 | [`security-guidance`](security-guidance/) | anthropics/claude-code | PreToolUseフックによるセキュリティ監視（9パターン） |
 | [`frontend-design`](frontend-design/) | anthropics/claude-code | 汎用AI美学を避けた本番品質フロントエンドデザイン指針 |
-| [`plugin-dev`](plugin-dev/) | anthropics/claude-code | Claude Codeプラグイン開発ツールキット |
 
 ## マーケットプレイスの登録
 
