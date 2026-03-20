@@ -45,6 +45,8 @@ const REPO_DIR = path.resolve(
   ".."
 );
 
+const FORCE = process.argv.includes("--force");
+
 function checkIsInsideRepo(installDir: string): boolean {
   return installDir === REPO_DIR || installDir.startsWith(REPO_DIR + path.sep);
 }
@@ -81,11 +83,15 @@ async function main(): Promise<void> {
 
   // Guard: prevent installing into the repo itself
   if (!isGlobal && checkIsInsideRepo(process.cwd())) {
-    log.error(
-      "claude-code-tools リポジトリ内ではローカルインストールできません。"
-    );
-    log.info("--global を選択するか、別のプロジェクトで実行してください。");
-    process.exit(1);
+    if (!FORCE) {
+      log.error(
+        "claude-code-tools リポジトリ内ではローカルインストールできません。"
+      );
+      log.info("--global を選択するか、別のプロジェクトで実行してください。");
+      log.info("リポジトリ内へのインストールを強制するには --force を指定してください。");
+      process.exit(1);
+    }
+    log.warn("--force が指定されました。リポジトリ内へのローカルインストールを続行します。");
   }
 
   // --- Step 2: Components ---
