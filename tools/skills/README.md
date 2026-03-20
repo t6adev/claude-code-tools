@@ -4,11 +4,12 @@
 
 ## code
 
-| スキル                                         | コマンド                               | 説明                                                                |
-| ---------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------- |
-| [explain](code/explain/)                       | `/explain [file or function]`          | コードを平易な言葉で説明                                            |
-| [pr-review-router](code/pr-review-router/)     | `/pr-review-router [intent]`           | レビュー意図を解析し code-review / pr-review-toolkit へルーティング |
-| [node-project-setup](code/node-project-setup/) | `/node-project-setup [directory or .]` | pnpm・TypeScript・並列 check パターンで Node.js プロジェクトを設定  |
+| スキル                                         | コマンド                               | 説明                                                                             |
+| ---------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| [explain](code/explain/)                       | `/explain [file or function]`          | コードを平易な言葉で説明                                                         |
+| [pr-review-router](code/pr-review-router/)     | `/pr-review-router [intent]`           | レビュー意図を解析し code-review / pr-review-toolkit へルーティング              |
+| [node-project-setup](code/node-project-setup/) | `/node-project-setup [directory or .]` | pnpm・TypeScript・並列 check パターンで Node.js プロジェクトを設定               |
+| [start-webapp](code/start-webapp/)             | `/start-webapp`                        | 新規Webアプリの立ち上げウィザード（ヒアリング→設計→タスク化→GitHub Project登録） |
 
 ## meta
 
