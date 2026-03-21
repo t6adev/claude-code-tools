@@ -324,14 +324,8 @@ async function main(): Promise<void> {
         ms.start("Hook configs をマージ中...");
 
         for (const config of allConfigs) {
-          const result = mergeSettingsHooks(
-            settingsDstPath,
-            config.hooks as Record<
-              string,
-              Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
-            >,
-            { dryRun: DRY_RUN },
-          );
+          const rewrittenHooks = rewriteHookCommandPaths(config.hooks as HooksMap, hooksDir);
+          const result = mergeSettingsHooks(settingsDstPath, rewrittenHooks, { dryRun: DRY_RUN });
           hooksMergeLog.push(...result.addedEntries);
         }
 
@@ -441,6 +435,26 @@ async function main(): Promise<void> {
     DRY_RUN
       ? "ドライラン完了。実際にインストールするには再実行してください。"
       : "インストール完了！\n  更新するには npx を再実行してください。",
+  );
+}
+
+type HooksMap = Record<
+  string,
+  Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
+>;
+
+function rewriteHookCommandPaths(hooks: HooksMap, hooksDir: string): HooksMap {
+  return Object.fromEntries(
+    Object.entries(hooks).map(([event, groups]) => [
+      event,
+      groups.map((group) => ({
+        ...group,
+        hooks: group.hooks.map((h) => ({
+          ...h,
+          command: path.join(hooksDir, path.basename(h.command)),
+        })),
+      })),
+    ]),
   );
 }
 

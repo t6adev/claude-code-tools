@@ -4,10 +4,10 @@ Claude Code のライフサイクルフックの定義です。
 
 ## Hook セット一覧
 
-| セット名         | 説明                                        |
-| ---------------- | ------------------------------------------- |
-| `safety-rails`   | `rm -rf /` など危険な削除コマンドをブロック |
-| `notify-on-stop` | 応答完了時にデスクトップ通知を送る          |
+| セット名         | 説明                                           |
+| ---------------- | ---------------------------------------------- |
+| `safety-rails`   | `rm -rf /` など危険な削除コマンドをブロック    |
+| `notify-on-stop` | 応答完了時・許可要求時にデスクトップ通知を送る |
 
 ## 使い方
 
@@ -17,13 +17,15 @@ Claude Code のライフサイクルフックの定義です。
 
 ```bash
 REPO=~/path/to/claude-code-tools
+INSTALL_DIR=~/.claude  # ローカルインストールの場合は /path/to/project/.claude
 
 # スクリプトをコピー
-cp "$REPO/tools/hooks/safety-rails/block-dangerous-rm.sh" ~/.claude/hooks/
-chmod +x ~/.claude/hooks/block-dangerous-rm.sh
+cp "$REPO/tools/hooks/safety-rails/block-dangerous-rm.sh" "$INSTALL_DIR/hooks/"
+chmod +x "$INSTALL_DIR/hooks/block-dangerous-rm.sh"
 
 # settings.json に Hook 設定をマージ
-# safety-rails.json の "hooks" セクションを ~/.claude/settings.json に追記する
+# safety-rails.json の "hooks" セクションを $INSTALL_DIR/settings.json に追記し、
+# command パスを実際のインストール先（$INSTALL_DIR/hooks/...）に書き換える
 ```
 
 ## Hook イベント一覧

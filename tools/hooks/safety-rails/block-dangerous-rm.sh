@@ -8,7 +8,7 @@
 #   rm -rf ~ (ホームディレクトリ全体)
 #   rm -rf /* など
 #
-# 使い方（settings.json）:
+# 使い方例（settings.json）:
 #   {
 #     "hooks": {
 #       "PreToolUse": [{

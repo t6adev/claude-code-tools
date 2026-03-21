@@ -3,7 +3,7 @@
 #
 # 対応OS: macOS（osascript）、Linux（notify-send）
 #
-# 使い方（settings.json）:
+# 使い方例（settings.json）:
 #   {
 #     "hooks": {
 #       "Stop": [{

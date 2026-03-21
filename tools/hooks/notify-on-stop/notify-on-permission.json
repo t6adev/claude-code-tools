@@ -1,0 +1,17 @@
+{
+  "_comment": "許可要求通知のプリセット。.claude/settings.json の hooks セクションにマージして使う。notify-on-stop.json と組み合わせて使うことを推奨。",
+  "_scripts_note": "インストーラーが command パスをインストール先に合わせて自動書き換えします。手動マージ時は実際のパスに変更してください。",
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INSTALL_DIR/hooks/notify-on-permission.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
