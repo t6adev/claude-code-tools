@@ -136,7 +136,7 @@ async function main(): Promise<void> {
   const components = await multiselect({
     message: "インストールする項目を選んでください（スペースで選択）",
     options: componentOptions,
-    initialValues: ["skills", "agents", "plugins"],
+    initialValues: isGlobal ? [] : ["skills", "agents", "plugins"],
     required: true,
   });
 
@@ -258,7 +258,7 @@ async function main(): Promise<void> {
         label: hs.name,
         hint: hs.scripts.map((s) => s.name).join(", "),
       })),
-      initialValues: allHookSets.map((hs) => hs.name),
+      initialValues: [],
       required: false,
     });
 
@@ -364,7 +364,7 @@ async function main(): Promise<void> {
           (e.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {},
         ).join(", "),
       })),
-      initialValues: allEntries.map((e) => e.serverDir),
+      initialValues: [],
       required: false,
     });
 
