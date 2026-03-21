@@ -33,8 +33,21 @@ if (process.platform === "win32") {
 // REPO_DIR: directory containing the package (one level up from this script)
 const REPO_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
+const HELP = process.argv.includes("--help") || process.argv.includes("-h");
 const FORCE = process.argv.includes("--force");
 const DRY_RUN = process.argv.includes("--dry-run");
+
+if (HELP) {
+  console.log(`
+Usage: npx claude-code-tools [options]
+
+Options:
+  --help, -h    このヘルプを表示して終了
+  --force       このリポジトリ自体へのインストールを強制的に許可する
+  --dry-run     実際の変更を行わずにインストール手順をシミュレートする
+`);
+  process.exit(0);
+}
 
 function checkIsInsideRepo(installDir: string): boolean {
   return installDir === REPO_DIR || installDir.startsWith(REPO_DIR + path.sep);
