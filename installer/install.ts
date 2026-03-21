@@ -17,8 +17,7 @@ import {
   discoverSkills,
   discoverAgents,
   discoverPlugins,
-  discoverHookScripts,
-  discoverHookConfigs,
+  discoverHookSets,
   discoverMcpEntries,
   discoverClaudeMdTemplates,
   type PluginInfo,
@@ -255,70 +254,99 @@ async function main(): Promise<void> {
   // Hooks
   const hooksMergeLog: AddedEntry[] = [];
   let hookSettingsFile: string | null = null;
+  const installedHookSets: ReturnType<typeof discoverHookSets> = [];
   if (selectedComponents.includes("hooks")) {
-    const s = spinner();
-    s.start("Hooks をインストール中...");
-    const hooksDir = path.join(installDir, "hooks");
-    ensureDir(hooksDir, { dryRun: dryRun as boolean });
-    const scripts = discoverHookScripts(REPO_DIR);
-    let copied = 0;
-    let skipped = 0;
-    for (const script of scripts) {
-      const dst = path.join(hooksDir, script.name);
-      const result = copyFile(script.srcPath, dst, {
-        dryRun: dryRun as boolean,
-        executable: true,
-      });
-      if (result.action === "copied") copied++;
-      else skipped++;
+    const allHookSets = discoverHookSets(REPO_DIR);
+
+    const selectedHookIds = await multiselect({
+      message: "インストールする Hook セットを選んでください（スペースで選択）",
+      options: allHookSets.map((hs) => ({
+        value: hs.name,
+        label: hs.name,
+        hint: hs.scripts.map((s) => s.name).join(", "),
+      })),
+      initialValues: allHookSets.map((hs) => hs.name),
+      required: false,
+    });
+
+    if (isCancel(selectedHookIds)) {
+      cancel("キャンセルしました。");
+      process.exit(0);
     }
-    s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${scripts.length} 個）`);
 
-    // Merge hook configs into settings file
-    const hookConfigs = discoverHookConfigs(REPO_DIR);
-    if (hookConfigs.length > 0) {
-      const settingsTarget = await select({
-        message: "Hook configs を settings にマージします。対象ファイルを選んでください",
-        options: [
-          {
-            value: "settings.json",
-            label: "settings.json",
-            hint: `${installDir}/settings.json（プロジェクト共有）`,
-          },
-          {
-            value: "settings.local.json",
-            label: "settings.local.json",
-            hint: `${installDir}/settings.local.json（個人設定・gitignore 推奨）`,
-          },
-        ],
-      });
+    const selectedIds = selectedHookIds as string[];
+    const selectedHookSets = allHookSets.filter((hs) => selectedIds.includes(hs.name));
 
-      if (isCancel(settingsTarget)) {
-        cancel("キャンセルしました。");
-        process.exit(0);
+    if (selectedHookSets.length > 0) {
+      const s = spinner();
+      s.start("Hooks をインストール中...");
+      const hooksDir = path.join(installDir, "hooks");
+      ensureDir(hooksDir, { dryRun: dryRun as boolean });
+      let copied = 0;
+      let skipped = 0;
+
+      for (const hookSet of selectedHookSets) {
+        for (const script of hookSet.scripts) {
+          const dst = path.join(hooksDir, script.name);
+          const result = copyFile(script.srcPath, dst, {
+            dryRun: dryRun as boolean,
+            executable: true,
+          });
+          if (result.action === "copied") copied++;
+          else skipped++;
+        }
+        installedHookSets.push(hookSet);
       }
 
-      hookSettingsFile = settingsTarget as string;
-      const settingsDstPath = path.join(installDir, hookSettingsFile);
-      const ms = spinner();
-      ms.start("Hook configs をマージ中...");
+      const totalScripts = selectedHookSets.reduce((n, hs) => n + hs.scripts.length, 0);
+      s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${totalScripts} 個）`);
 
-      for (const config of hookConfigs) {
-        const result = mergeSettingsHooks(
-          settingsDstPath,
-          config.hooks as Record<
-            string,
-            Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
-          >,
-          { dryRun: dryRun as boolean },
-        );
-        hooksMergeLog.push(...result.addedEntries);
-      }
+      // Merge hook configs into settings file
+      const allConfigs = selectedHookSets.flatMap((hs) => hs.configs);
+      if (allConfigs.length > 0) {
+        const settingsTarget = await select({
+          message: "Hook configs を settings にマージします。対象ファイルを選んでください",
+          options: [
+            {
+              value: "settings.json",
+              label: "settings.json",
+              hint: `${installDir}/settings.json（プロジェクト共有）`,
+            },
+            {
+              value: "settings.local.json",
+              label: "settings.local.json",
+              hint: `${installDir}/settings.local.json（個人設定・gitignore 推奨）`,
+            },
+          ],
+        });
 
-      if (hooksMergeLog.length > 0) {
-        ms.stop(`Hook configs をマージしました (${hookSettingsFile})`);
-      } else {
-        ms.stop(`Hook configs: 変更なし（全て既存のエントリと重複）`);
+        if (isCancel(settingsTarget)) {
+          cancel("キャンセルしました。");
+          process.exit(0);
+        }
+
+        hookSettingsFile = settingsTarget as string;
+        const settingsDstPath = path.join(installDir, hookSettingsFile);
+        const ms = spinner();
+        ms.start("Hook configs をマージ中...");
+
+        for (const config of allConfigs) {
+          const result = mergeSettingsHooks(
+            settingsDstPath,
+            config.hooks as Record<
+              string,
+              Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
+            >,
+            { dryRun: dryRun as boolean },
+          );
+          hooksMergeLog.push(...result.addedEntries);
+        }
+
+        if (hooksMergeLog.length > 0) {
+          ms.stop(`Hook configs をマージしました (${hookSettingsFile})`);
+        } else {
+          ms.stop(`Hook configs: 変更なし（全て既存のエントリと重複）`);
+        }
       }
     }
   }
@@ -399,6 +427,13 @@ async function main(): Promise<void> {
     log.info(`Hook configs の変更内容 (${hookSettingsFile}):`);
     for (const entry of hooksMergeLog) {
       log.info(`  + ${entry.event}: ${entry.command}`);
+    }
+  }
+
+  // Show post-install notes for installed Hook sets
+  for (const hookSet of installedHookSets) {
+    if (hookSet.postInstallNote) {
+      log.info(`\n[Hook: ${hookSet.name}] インストール後の作業:\n${hookSet.postInstallNote}`);
     }
   }
 

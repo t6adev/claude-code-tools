@@ -2,36 +2,28 @@
 
 Claude Code のライフサイクルフックの定義です。
 
-## 構成
+## Hook セット一覧
 
-```
-hooks/
-├── scripts/        実行スクリプト（hookから呼ばれる）
-│   ├── pre-tool/   PreToolUse イベント用
-│   └── post-tool/  PostToolUse イベント用
-└── configs/        settings.json にマージできる JSON スニペット
-```
+| セット名         | 説明                                        |
+| ---------------- | ------------------------------------------- |
+| `safety-rails`   | `rm -rf /` など危険な削除コマンドをブロック |
+| `notify-on-stop` | 応答完了時にデスクトップ通知を送る          |
 
 ## 使い方
 
-### 1. スクリプトをインストールする
+インストーラー（`npx github:t6adev/claude-code-tools`）を使うとインタラクティブに選択してインストールできます。
+
+手動でインストールする場合:
 
 ```bash
 REPO=~/path/to/claude-code-tools
 
-# スクリプトをコピー（または参照パスをそのまま使う）
-cp "$REPO/hooks/scripts/pre-tool/block-dangerous-rm.sh" ~/.claude/hooks/
+# スクリプトをコピー
+cp "$REPO/tools/hooks/safety-rails/block-dangerous-rm.sh" ~/.claude/hooks/
 chmod +x ~/.claude/hooks/block-dangerous-rm.sh
-```
 
-### 2. settings.json に Hook 設定を追加する
-
-`hooks/configs/` 内の JSON スニペットを参考に `~/.claude/settings.json` へ追記します。
-
-または、configs/ 内のファイルを丸ごとコピーして出発点にします:
-
-```bash
-cp "$REPO/hooks/configs/safety-rails.json" ~/.claude/settings.json
+# settings.json に Hook 設定をマージ
+# safety-rails.json の "hooks" セクションを ~/.claude/settings.json に追記する
 ```
 
 ## Hook イベント一覧
@@ -51,6 +43,10 @@ cp "$REPO/hooks/configs/safety-rails.json" ~/.claude/settings.json
 | `1`    | ブロック（stdout のメッセージを Claude に渡す）   |
 | `2`    | 強制ブロック（stdout を無視してツール実行を中断） |
 
-## 新しいスクリプトを追加する
+## 新しい Hook セットを追加する
 
-[`docs/hook-authoring-guide.md`](../../docs/hook-authoring-guide.md) を参照してください。
+1. `hooks/<set-name>/` ディレクトリを作成する
+2. スクリプト（`.sh`）と Hook 設定（`.json`、`"hooks"` キーを含む）を配置する
+3. 必要に応じて `POST_INSTALL.md` を追加する（インストール後にターミナルへ表示される）
+
+[`docs/hook-authoring-guide.md`](../../docs/hook-authoring-guide.md) も参照してください。

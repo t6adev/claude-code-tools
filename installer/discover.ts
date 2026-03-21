@@ -20,9 +20,12 @@ export interface PluginInfo {
   enabled: boolean;
 }
 
-export interface HookScriptInfo {
+export interface HookSetInfo {
   name: string;
-  srcPath: string;
+  setDir: string;
+  scripts: Array<{ name: string; srcPath: string }>;
+  configs: Array<{ name: string; hooks: Record<string, unknown> }>;
+  postInstallNote: string | null;
 }
 
 export interface McpEntryInfo {
@@ -112,50 +115,42 @@ function parsePluginYaml(content: string): PluginInfo | null {
   };
 }
 
-export function discoverHookScripts(repoDir: string): HookScriptInfo[] {
-  const scriptsDir = path.join(repoDir, "tools", "hooks", "scripts");
-  const results: HookScriptInfo[] = [];
+export function discoverHookSets(repoDir: string): HookSetInfo[] {
+  const hooksDir = path.join(repoDir, "tools", "hooks");
+  const results: HookSetInfo[] = [];
 
-  if (!fs.existsSync(scriptsDir)) return results;
+  if (!fs.existsSync(hooksDir)) return results;
 
-  collectShScripts(scriptsDir, results);
-  return results;
-}
+  for (const setName of fs.readdirSync(hooksDir)) {
+    const setDir = path.join(hooksDir, setName);
+    if (!fs.statSync(setDir).isDirectory()) continue;
 
-function collectShScripts(dir: string, results: HookScriptInfo[]): void {
-  for (const entry of fs.readdirSync(dir)) {
-    const entryPath = path.join(dir, entry);
-    const stat = fs.statSync(entryPath);
-    if (stat.isDirectory()) {
-      collectShScripts(entryPath, results);
-    } else if (entry.endsWith(".sh")) {
-      results.push({ name: entry, srcPath: entryPath });
+    const scripts: HookSetInfo["scripts"] = [];
+    const configs: HookSetInfo["configs"] = [];
+
+    for (const file of fs.readdirSync(setDir)) {
+      const filePath = path.join(setDir, file);
+      if (file.endsWith(".sh")) {
+        scripts.push({ name: file, srcPath: filePath });
+      } else if (file.endsWith(".json")) {
+        const json = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>;
+        if (json.hooks) {
+          configs.push({
+            name: file.replace(/\.json$/, ""),
+            hooks: json.hooks as Record<string, unknown>,
+          });
+        }
+      }
     }
-  }
-}
 
-export interface HookConfigInfo {
-  name: string;
-  srcPath: string;
-  hooks: Record<string, unknown>;
-}
+    if (scripts.length === 0 && configs.length === 0) continue;
 
-export function discoverHookConfigs(repoDir: string): HookConfigInfo[] {
-  const configsDir = path.join(repoDir, "tools", "hooks", "configs");
-  const results: HookConfigInfo[] = [];
+    const notePath = path.join(setDir, "POST_INSTALL.md");
+    const postInstallNote = fs.existsSync(notePath)
+      ? fs.readFileSync(notePath, "utf-8").trim()
+      : null;
 
-  if (!fs.existsSync(configsDir)) return results;
-
-  for (const entry of fs.readdirSync(configsDir)) {
-    if (!entry.endsWith(".json")) continue;
-    const srcPath = path.join(configsDir, entry);
-    const json = JSON.parse(fs.readFileSync(srcPath, "utf-8")) as Record<string, unknown>;
-    if (!json.hooks) continue;
-    results.push({
-      name: entry.replace(/\.json$/, ""),
-      srcPath,
-      hooks: json.hooks as Record<string, unknown>,
-    });
+    results.push({ name: setName, setDir, scripts, configs, postInstallNote });
   }
 
   return results;
