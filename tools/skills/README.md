@@ -20,6 +20,7 @@
 | [debug-assist](code/debug-assist/)             | `/debug-assist [error-message]`        | エラー・スタックトレースを解析して原因仮説と修正方針を提示                       |
 | [impact-analysis](code/impact-analysis/)       | `/impact-analysis [file\|symbol]`      | ファイル・シンボルの変更前に影響を受ける依存元とテストを列挙                     |
 | [analyze-project](code/analyze-project/)       | `/analyze-project [goal]`              | 既存プロジェクトを解析してCLAUDE.md・architecture.md・migration-plan.mdを生成    |
+| [task-breakdown](code/task-breakdown/)         | `/task-breakdown [project-number]`     | 既存プロジェクトのペインポイントを洗い出し、GitHub IssueとProject Boardに登録    |
 
 ## docs
 
