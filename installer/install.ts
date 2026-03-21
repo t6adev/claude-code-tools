@@ -2,17 +2,7 @@
 import * as path from "path";
 import * as os from "os";
 import { fileURLToPath } from "url";
-import {
-  intro,
-  outro,
-  select,
-  multiselect,
-  confirm,
-  spinner,
-  log,
-  cancel,
-  isCancel,
-} from "@clack/prompts";
+import { intro, outro, select, multiselect, spinner, log, cancel, isCancel } from "@clack/prompts";
 import {
   discoverSkills,
   discoverAgents,
@@ -44,6 +34,7 @@ if (process.platform === "win32") {
 const REPO_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const FORCE = process.argv.includes("--force");
+const DRY_RUN = process.argv.includes("--dry-run");
 
 function checkIsInsideRepo(installDir: string): boolean {
   return installDir === REPO_DIR || installDir.startsWith(REPO_DIR + path.sep);
@@ -51,6 +42,10 @@ function checkIsInsideRepo(installDir: string): boolean {
 
 async function main(): Promise<void> {
   intro("claude-code-tools インストーラー");
+
+  if (DRY_RUN) {
+    log.warn("ドライランモード: 実際の変更は行いません。");
+  }
 
   // --- Step 1: Scope ---
   const scope = await select({
@@ -173,34 +168,19 @@ async function main(): Promise<void> {
     }
   }
 
-  // --- Step 4: Dry run? ---
-  const dryRun = await confirm({
-    message: "ドライラン（変更なしで確認のみ）モードで実行しますか？",
-    initialValue: false,
-  });
-
-  if (isCancel(dryRun)) {
-    cancel("キャンセルしました。");
-    process.exit(0);
-  }
-
-  if (dryRun) {
-    log.warn("ドライランモード: 実際の変更は行いません。");
-  }
-
-  // --- Step 5: Execute ---
+  // --- Step 4: Execute ---
 
   // Skills
   if (selectedComponents.includes("skills")) {
     const s = spinner();
     s.start("Skills をインストール中...");
-    ensureDir(path.join(installDir, "skills"), { dryRun: dryRun as boolean });
+    ensureDir(path.join(installDir, "skills"), { dryRun: DRY_RUN });
     const skills = discoverSkills(REPO_DIR);
     let copied = 0;
     let skipped = 0;
     for (const skill of skills) {
       const dst = path.join(installDir, "skills", skill.name);
-      const result = copyDir(skill.srcPath, dst, { dryRun: dryRun as boolean });
+      const result = copyDir(skill.srcPath, dst, { dryRun: DRY_RUN });
       if (result.action === "copied") copied++;
       else skipped++;
     }
@@ -211,13 +191,13 @@ async function main(): Promise<void> {
   if (selectedComponents.includes("agents")) {
     const s = spinner();
     s.start("Agents をインストール中...");
-    ensureDir(path.join(installDir, "agents"), { dryRun: dryRun as boolean });
+    ensureDir(path.join(installDir, "agents"), { dryRun: DRY_RUN });
     const agents = discoverAgents(REPO_DIR);
     let copied = 0;
     let skipped = 0;
     for (const agent of agents) {
       const dst = path.join(installDir, "agents", agent.name);
-      const result = copyDir(agent.srcPath, dst, { dryRun: dryRun as boolean });
+      const result = copyDir(agent.srcPath, dst, { dryRun: DRY_RUN });
       if (result.action === "copied") copied++;
       else skipped++;
     }
@@ -236,7 +216,7 @@ async function main(): Promise<void> {
     for (const plugin of plugins) {
       const result = installPlugin(plugin, {
         scope: isGlobal ? "global" : "local",
-        dryRun: dryRun as boolean,
+        dryRun: DRY_RUN,
       });
       if (result.action === "installed") installed++;
       else if (result.action === "failed") {
@@ -281,7 +261,7 @@ async function main(): Promise<void> {
       const s = spinner();
       s.start("Hooks をインストール中...");
       const hooksDir = path.join(installDir, "hooks");
-      ensureDir(hooksDir, { dryRun: dryRun as boolean });
+      ensureDir(hooksDir, { dryRun: DRY_RUN });
       let copied = 0;
       let skipped = 0;
 
@@ -289,7 +269,7 @@ async function main(): Promise<void> {
         for (const script of hookSet.scripts) {
           const dst = path.join(hooksDir, script.name);
           const result = copyFile(script.srcPath, dst, {
-            dryRun: dryRun as boolean,
+            dryRun: DRY_RUN,
             executable: true,
           });
           if (result.action === "copied") copied++;
@@ -337,7 +317,7 @@ async function main(): Promise<void> {
               string,
               Array<{ matcher?: string; hooks: Array<{ type: string; command: string }> }>
             >,
-            { dryRun: dryRun as boolean },
+            { dryRun: DRY_RUN },
           );
           hooksMergeLog.push(...result.addedEntries);
         }
@@ -387,7 +367,7 @@ async function main(): Promise<void> {
       for (const entry of selectedEntries) {
         const servers = (entry.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {};
         const result = mergeMcpJson(mcpDstPath, servers, {
-          dryRun: dryRun as boolean,
+          dryRun: DRY_RUN,
         });
         if (result.action === "merged") {
           merged++;
@@ -414,7 +394,7 @@ async function main(): Promise<void> {
       "CLAUDE.md",
     );
     const dst = path.join(process.cwd(), "CLAUDE.md");
-    const result = copyFile(templateSrc, dst, { dryRun: dryRun as boolean });
+    const result = copyFile(templateSrc, dst, { dryRun: DRY_RUN });
     s.stop(
       result.action === "copied"
         ? `CLAUDE.md を配置しました（テンプレート: ${claudeMdTemplate}）`
@@ -445,7 +425,7 @@ async function main(): Promise<void> {
   }
 
   outro(
-    dryRun
+    DRY_RUN
       ? "ドライラン完了。実際にインストールするには再実行してください。"
       : "インストール完了！\n  更新するには npx を再実行してください。",
   );
