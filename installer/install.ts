@@ -277,6 +277,7 @@ async function main(): Promise<void> {
       ensureDir(hooksDir, { dryRun: DRY_RUN });
       let copied = 0;
       let skipped = 0;
+      const copiedScripts: string[] = [];
 
       for (const hookSet of selectedHookSets) {
         for (const script of hookSet.scripts) {
@@ -285,14 +286,25 @@ async function main(): Promise<void> {
             dryRun: DRY_RUN,
             executable: true,
           });
-          if (result.action === "copied") copied++;
-          else skipped++;
+          if (result.action === "copied") {
+            copied++;
+            copiedScripts.push(dst);
+          } else {
+            skipped++;
+          }
         }
         installedHookSets.push(hookSet);
       }
 
       const totalScripts = selectedHookSets.reduce((n, hs) => n + hs.scripts.length, 0);
       s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${totalScripts} 個）`);
+
+      if (copiedScripts.length > 0) {
+        const chmodLines = copiedScripts.map((p) => `  chmod +x ${p}`).join("\n");
+        log.info(
+          `スクリプトへの実行権限は自動的に付与されています。手動で確認・再付与する場合:\n${chmodLines}`,
+        );
+      }
 
       // Merge hook configs into settings file
       const allConfigs = selectedHookSets.flatMap((hs) => hs.configs);
