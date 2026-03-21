@@ -19,6 +19,7 @@
 | [implement-task](code/implement-task/)         | `/implement-task [issue-url\|#number]` | GitHub Issue を起点に実装・検証・PR作成まで一貫して実行                          |
 | [debug-assist](code/debug-assist/)             | `/debug-assist [error-message]`        | エラー・スタックトレースを解析して原因仮説と修正方針を提示                       |
 | [impact-analysis](code/impact-analysis/)       | `/impact-analysis [file\|symbol]`      | ファイル・シンボルの変更前に影響を受ける依存元とテストを列挙                     |
+| [analyze-project](code/analyze-project/)       | `/analyze-project [goal]`              | 既存プロジェクトを解析してCLAUDE.md・architecture.md・migration-plan.mdを生成    |
 
 ## docs
 
