@@ -29,6 +29,8 @@ export interface McpEntryInfo {
   serverDir: string;
   srcPath: string;
   json: Record<string, unknown>;
+  name: string;
+  postInstallNote: string | null;
 }
 
 export function discoverSkills(repoDir: string): SkillInfo[] {
@@ -170,7 +172,11 @@ export function discoverMcpEntries(repoDir: string): McpEntryInfo[] {
     if (!fs.existsSync(mcpJsonPath)) continue;
 
     const json = JSON.parse(fs.readFileSync(mcpJsonPath, "utf-8")) as Record<string, unknown>;
-    results.push({ serverDir, srcPath: mcpJsonPath, json });
+    const notePath = path.join(mcpDir, serverDir, "POST_INSTALL.md");
+    const postInstallNote = fs.existsSync(notePath)
+      ? fs.readFileSync(notePath, "utf-8").trim()
+      : null;
+    results.push({ serverDir, srcPath: mcpJsonPath, json, name: serverDir, postInstallNote });
   }
 
   return results;

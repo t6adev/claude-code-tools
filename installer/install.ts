@@ -323,32 +323,54 @@ async function main(): Promise<void> {
     }
   }
 
-  // MCP (global only)
+  // MCP
+  const installedMcpEntries: ReturnType<typeof discoverMcpEntries> = [];
   if (selectedComponents.includes("mcp")) {
-    const s = spinner();
-    s.start("MCP サーバー設定をインストール中...");
-    const mcpDstPath = path.join(installDir, ".mcp.json");
-    const entries = discoverMcpEntries(REPO_DIR);
-    let merged = 0;
-    let noop = 0;
-    let hasPlaceholder = false;
+    const allEntries = discoverMcpEntries(REPO_DIR);
 
-    for (const entry of entries) {
-      const servers = (entry.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {};
-      const result = mergeMcpJson(mcpDstPath, servers, {
-        dryRun: dryRun as boolean,
-      });
-      if (result.action === "merged") merged++;
-      else noop++;
-      if (result.hasPlaceholder) hasPlaceholder = true;
+    const selectedMcpIds = await multiselect({
+      message: "インストールする MCP サーバーを選んでください（スペースで選択）",
+      options: allEntries.map((e) => ({
+        value: e.serverDir,
+        label: e.serverDir,
+        hint: Object.keys(
+          (e.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {},
+        ).join(", "),
+      })),
+      initialValues: allEntries.map((e) => e.serverDir),
+      required: false,
+    });
+
+    if (isCancel(selectedMcpIds)) {
+      cancel("キャンセルしました。");
+      process.exit(0);
     }
 
-    s.stop(`MCP: ${merged} 個マージ、${noop} 個スキップ（計 ${entries.length} 個）`);
-    if (hasPlaceholder) {
-      log.warn(
-        `~/.claude/.mcp.json の filesystem エントリに "/path/to/allowed/directory" プレースホルダーが含まれています。`,
-      );
-      log.warn("実際のパスに手動で書き換えてください。");
+    const selectedIds = selectedMcpIds as string[];
+    const selectedEntries = allEntries.filter((e) => selectedIds.includes(e.serverDir));
+
+    if (selectedEntries.length > 0) {
+      const s = spinner();
+      s.start("MCP サーバー設定をインストール中...");
+      const mcpDstPath = path.join(installDir, ".mcp.json");
+      let merged = 0;
+      let noop = 0;
+
+      for (const entry of selectedEntries) {
+        const servers = (entry.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {};
+        const result = mergeMcpJson(mcpDstPath, servers, {
+          dryRun: dryRun as boolean,
+        });
+        if (result.action === "merged") {
+          merged++;
+          installedMcpEntries.push(entry);
+        } else {
+          noop++;
+          installedMcpEntries.push(entry);
+        }
+      }
+
+      s.stop(`MCP: ${merged} 個マージ、${noop} 個スキップ（計 ${selectedEntries.length} 個）`);
     }
   }
 
@@ -377,6 +399,13 @@ async function main(): Promise<void> {
     log.info(`Hook configs の変更内容 (${hookSettingsFile}):`);
     for (const entry of hooksMergeLog) {
       log.info(`  + ${entry.event}: ${entry.command}`);
+    }
+  }
+
+  // Show post-install notes for installed MCP servers
+  for (const entry of installedMcpEntries) {
+    if (entry.postInstallNote) {
+      log.info(`\n[MCP: ${entry.serverDir}] インストール後の作業:\n${entry.postInstallNote}`);
     }
   }
 
