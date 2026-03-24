@@ -79,9 +79,21 @@ export function installPlugin(
       args.push("--scope", "project");
     }
     args.push(pluginRef);
-    execFileSync("claude", args, { stdio: "inherit" });
+    execFileSync("claude", args, { stdio: ["inherit", "inherit", "pipe"] });
     return { pluginId: plugin.pluginId, action: "installed" };
-  } catch {
+  } catch (err) {
+    // Fallback for older Claude CLI versions that don't support --scope
+    const stderr = (err as { stderr?: Buffer })?.stderr?.toString() ?? "";
+    if (opts.scope === "local" && stderr.includes("unknown option")) {
+      try {
+        execFileSync("claude", ["plugin", "install", pluginRef], {
+          stdio: "inherit",
+        });
+        return { pluginId: plugin.pluginId, action: "installed" };
+      } catch {
+        // fall through to failure
+      }
+    }
     return {
       pluginId: plugin.pluginId,
       action: "failed",
