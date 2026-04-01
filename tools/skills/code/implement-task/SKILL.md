@@ -139,6 +139,15 @@ Issue の内容をもとに、実装に必要なコードを特定する。
 
 探索結果をもとに実装計画を立てる。
 
+### 作業方式の選択
+
+計画を提示する際、以下の 2 つの作業方式をユーザーに提示して選択を促す:
+
+| 方式                            | 説明                                                                                 | 適したケース                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| **A: git worktree（推奨）**     | 別ディレクトリに作業環境を作成する。メインのワーキングツリーを汚さず、並行作業も可能 | メインブランチで作業中、未コミットの変更がある、複数タスクを並行したい場合 |
+| **B: git checkout（従来方式）** | 現在のディレクトリでブランチを切り替える                                             | 単一タスクに集中、ディスク容量を節約したい場合                             |
+
 ### 計画の書き出し
 
 `tasks/todo.md` に以下の形式でチェックリストを作成する（ファイルが存在しない場合は新規作成する）。
@@ -161,6 +170,7 @@ Issue の内容をもとに、実装に必要なコードを特定する。
 ### 作業ブランチ
 
 - `fix/38-session-not-destroyed-on-logout`
+- 作業方式: worktree / checkout
 ```
 
 ### 計画の品質チェック
@@ -184,11 +194,31 @@ Issue の内容をもとに、実装に必要なコードを特定する。
 
 ### ブランチ作成
 
+ブランチ名の形式: `<type>/<issue-number>-<short-description>`（例: `feat/42-user-auth`、`fix/38-session-leak`）
+
+Phase 3 で選択した作業方式に応じてブランチを作成する。
+
+#### worktree 方式の場合
+
+ブランチ名の `/` を `-` に置換した文字列を worktree のディレクトリ名に使う（例: `feat/42-user-auth` → `feat-42-user-auth`）。
+
+```bash
+# ベースブランチの最新を取得
+git fetch origin <base-branch>
+# worktree を作成（ブランチも同時に作成）
+# <worktree-dir> = ブランチ名の / を - に置換した文字列
+git worktree add ../<worktree-dir> -b <branch-name> origin/<base-branch>
+# 作業ディレクトリを移動
+cd ../<worktree-dir>
+```
+
+- 以降のすべての作業（実装・検証・コミット）は worktree ディレクトリ内で行う
+
+#### checkout 方式の場合（従来方式）
+
 ```bash
 git checkout -b <branch-name>
 ```
-
-ブランチ名の形式: `<type>/<issue-number>-<short-description>`（例: `feat/42-user-auth`、`fix/38-session-leak`）
 
 ### 実装のルール
 
@@ -279,6 +309,18 @@ EOF
 ```
 
 PR 作成後に URL を表示してユーザーに伝える。
+
+### worktree のクリーンアップ
+
+worktree 方式で作業した場合、PR 作成後にクリーンアップを行う。
+ユーザーに「worktree を削除してよいか」を確認してから実行する。
+
+```bash
+# 元のディレクトリに戻る
+cd <original-dir>
+# worktree を削除
+git worktree remove ../<worktree-dir>
+```
 
 ---
 
