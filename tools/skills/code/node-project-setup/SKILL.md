@@ -106,9 +106,10 @@ pnpm add -D oxlint @oxc-project/oxfmt
 - **oxlint** — ESLint 互換の高速 linter
 - **oxfmt** — Biome 互換の高速 formatter
 
-## 6. Script Organization: parallel check パターン
+## 6. Script Organization: parallel check/fix パターン
 
 `pnpm run --parallel "/^check:.*/"` パターンを使って、`check:` プレフィックスを持つスクリプトをすべて並列実行します。
+同様に `fix:` プレフィックスで自動修正系タスクをまとめます。
 
 ```json
 {
@@ -117,7 +118,10 @@ pnpm add -D oxlint @oxc-project/oxfmt
     "check": "pnpm run --parallel \"/^check:.*/\"",
     "check:types": "tsc --noEmit",
     "check:lint": "oxlint",
-    "check:fmt": "oxfmt --check"
+    "check:fmt": "oxfmt --check",
+    "fix": "pnpm run --parallel \"/^fix:.*/\"",
+    "fix:lint": "oxlint --fix",
+    "fix:fmt": "oxfmt"
   }
 }
 ```
@@ -125,8 +129,9 @@ pnpm add -D oxlint @oxc-project/oxfmt
 **パターンの原則:**
 
 - 並列実行可能なチェック系タスクはすべて `check:` プレフィックスを付ける
-- `check` スクリプトは常に glob + parallel で実行する（個別スクリプトを直接列挙しない）
-- 新しいチェックを追加する際は `check:xxx` として追加するだけで自動的に `check` に含まれる
+- 自動修正系タスクはすべて `fix:` プレフィックスを付ける
+- `check` / `fix` スクリプトは常に正規表現 + parallel で実行する（個別スクリプトを直接列挙しない）
+- 新しいチェック/修正を追加する際は `check:xxx` / `fix:xxx` として追加するだけで自動的に含まれる
 
 同様のパターンを `test:` など他のカテゴリにも適用できます:
 
@@ -164,7 +169,10 @@ strict-peer-dependencies=false
     "check": "pnpm run --parallel \"/^check:.*/\"",
     "check:types": "tsc --noEmit",
     "check:lint": "oxlint",
-    "check:fmt": "oxfmt --check"
+    "check:fmt": "oxfmt --check",
+    "fix": "pnpm run --parallel \"/^fix:.*/\"",
+    "fix:lint": "oxlint --fix",
+    "fix:fmt": "oxfmt"
   },
   "devDependencies": {
     "@oxc-project/oxfmt": "latest",
@@ -182,5 +190,6 @@ strict-peer-dependencies=false
 ```bash
 pnpm install
 pnpm check        # 型チェック・lint・フォーマットをすべて並列実行
+pnpm fix          # lint・フォーマットの自動修正をすべて並列実行
 pnpm build        # TypeScript のビルド確認
 ```
