@@ -279,6 +279,7 @@ git checkout -b <branch-name>
 - type: `feat` / `fix` / `chore` / `refactor` / `docs` / `test`
 - scope: 変更の主要なファイル・モジュール名（省略可）
 - 50文字以内
+- Co-Authored-By トレーラーは含めない
 
 ### PR 作成
 

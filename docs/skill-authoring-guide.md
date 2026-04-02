@@ -119,7 +119,7 @@ argument-hint: "[scope]"
 4. `git commit -m` でコミットを作成する
 5. コミットハッシュとメッセージを表示する
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com> をメッセージに含める。
+Co-Authored-By トレーラーはコミットメッセージに含めない。
 ```
 
 ## plugin-dev を活用する
