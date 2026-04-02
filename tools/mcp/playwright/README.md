@@ -22,7 +22,7 @@
 ### CLI で追加（推奨）
 
 ```bash
-claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console,vision
+claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console,vision --output-dir .playwright-mcp
 ```
 
 ### プロジェクトへ追加
@@ -45,10 +45,10 @@ cp ~/path/to/claude-code-tools/tools/mcp/playwright/.mcp.json ./.mcp.json
 
 ```bash
 # コンソールエラー検出のみ（トークン節約）
-claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console
+claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console --output-dir .playwright-mcp
 
 # 視覚確認も含む（フル機能）
-claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console,vision
+claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console,vision --output-dir .playwright-mcp
 ```
 
 `vision` を外すとアクセシビリティツリーベースの操作になり、トークン消費を抑えられます。
@@ -61,10 +61,26 @@ claude mcp add playwright -- npx @playwright/mcp@latest --caps core,console,visi
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["@playwright/mcp@latest", "--caps", "core,console,vision"]
+      "args": [
+        "@playwright/mcp@latest",
+        "--caps",
+        "core,console,vision",
+        "--output-dir",
+        ".playwright-mcp"
+      ]
     }
   }
 }
+```
+
+## 出力ディレクトリ
+
+`--output-dir .playwright-mcp` を指定すると、スクリーンショット・トレース・動画などがプロジェクトルートの `.playwright-mcp/` ディレクトリに保存されます。
+
+`.gitignore` に追加しておくことを推奨します:
+
+```
+.playwright-mcp/
 ```
 
 ## 使用例
