@@ -30,10 +30,10 @@ export interface HookSetInfo {
 
 export interface McpEntryInfo {
   serverDir: string;
-  srcPath: string;
-  json: Record<string, unknown>;
   name: string;
-  postInstallNote: string | null;
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
 }
 
 export function discoverSkills(repoDir: string): SkillInfo[] {
@@ -163,18 +163,47 @@ export function discoverMcpEntries(repoDir: string): McpEntryInfo[] {
   if (!fs.existsSync(mcpDir)) return results;
 
   for (const serverDir of fs.readdirSync(mcpDir)) {
-    const mcpJsonPath = path.join(mcpDir, serverDir, ".mcp.json");
-    if (!fs.existsSync(mcpJsonPath)) continue;
+    const yamlPath = path.join(mcpDir, serverDir, "mcp.yaml");
+    if (!fs.existsSync(yamlPath)) continue;
 
-    const json = JSON.parse(fs.readFileSync(mcpJsonPath, "utf-8")) as Record<string, unknown>;
-    const notePath = path.join(mcpDir, serverDir, "POST_INSTALL.md");
-    const postInstallNote = fs.existsSync(notePath)
-      ? fs.readFileSync(notePath, "utf-8").trim()
-      : null;
-    results.push({ serverDir, srcPath: mcpJsonPath, json, name: serverDir, postInstallNote });
+    const content = fs.readFileSync(yamlPath, "utf-8");
+    const parsed = parseMcpYaml(content);
+    if (parsed) results.push({ serverDir, ...parsed });
   }
 
   return results;
+}
+
+function parseMcpYaml(content: string): Omit<McpEntryInfo, "serverDir"> | null {
+  const get = (key: string): string => {
+    const match = content.match(new RegExp(`^${key}:\\s*"?([^"#\\n]*)"?`, "m"));
+    return match ? match[1].trim() : "";
+  };
+
+  const name = get("name");
+  const command = get("command");
+  const argsRaw = get("args");
+
+  if (!name || !command || !argsRaw) return null;
+
+  const args = argsRaw.split(/\s+/);
+
+  // Parse env block (simple key: value pairs indented under "env:")
+  const env: Record<string, string> = {};
+  const envMatch = content.match(/^env:\s*\n((?:\s+.+\n?)*)/m);
+  if (envMatch) {
+    for (const line of envMatch[1].split("\n")) {
+      const kv = line.match(/^\s+(\w+):\s*"?([^"#\n]*)"?\s*$/);
+      if (kv) env[kv[1]] = kv[2].trim();
+    }
+  }
+
+  return {
+    name,
+    command,
+    args,
+    ...(Object.keys(env).length > 0 ? { env } : {}),
+  };
 }
 
 export function discoverClaudeMdTemplates(repoDir: string): string[] {

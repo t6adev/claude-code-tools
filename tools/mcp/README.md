@@ -12,45 +12,40 @@
 
 ## 使い方
 
-### プロジェクトへ追加（チーム共有）
-
-`.mcp.json` をプロジェクトルートにコピーして編集します:
+### インストーラーで追加（推奨）
 
 ```bash
-REPO=~/path/to/claude-code-tools
-
-cp "$REPO/mcp/github/.mcp.json" ./.mcp.json
-# 環境変数名・設定を確認して必要に応じて編集
+npx github:t6adev/claude-code-tools
 ```
 
-`.mcp.json` は git にコミットします（機密情報は環境変数で渡す）。
+MCP サーバー設定を選ぶと `claude mcp add` 経由でインストールされます。
 
-### グローバルへ追加（個人利用）
+### 手動で追加
 
 ```bash
-claude mcp add --transport stdio github \
-  --scope user \
-  -- npx -y @modelcontextprotocol/server-github
+# プロジェクトスコープ（チーム共有）
+claude mcp add --scope project playwright -- npx @playwright/mcp@latest --caps core,console,vision
+
+# ユーザースコープ（個人利用）
+claude mcp add --scope user github -- npx -y @modelcontextprotocol/server-github
 ```
 
-## `.mcp.json` フォーマット
+各サーバーの詳細なコマンドは各ディレクトリの README.md を参照してください。
 
-```json
-{
-  "mcpServers": {
-    "<server-name>": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "<package-name>"],
-      "env": {
-        "API_KEY": "${MY_API_KEY}"
-      }
-    }
-  }
-}
+## `claude mcp add` のオプション
+
+```bash
+claude mcp add [options] <name> -- <command> [args...]
 ```
 
-環境変数は `${VAR_NAME}` で参照します（シェルは展開しない、Claude Code が展開する）。
+| オプション          | 説明                                                  |
+| ------------------- | ----------------------------------------------------- |
+| `--scope project`   | プロジェクトルートの `.mcp.json` に追加（チーム共有） |
+| `--scope user`      | `~/.claude/.mcp.json` に追加（個人利用）              |
+| `--env KEY=VALUE`   | 環境変数を設定（複数指定可）                          |
+| `--transport stdio` | トランスポート方式を指定（デフォルト: stdio）         |
+
+環境変数は `${VAR_NAME}` で参照できます（Claude Code が実行時に展開）。
 
 ## 新しいサーバーを追加する
 

@@ -24,7 +24,7 @@ import {
   type PluginInfo,
 } from "./discover.js";
 import { copyDir, copyFile, ensureDir } from "./copy.js";
-import { mergeMcpJson } from "./mcp-merge.js";
+import { installMcp } from "./mcp-install.js";
 import { mergeSettingsHooks, type AddedEntry } from "./settings-merge.js";
 import { installPlugin } from "./plugins.js";
 
@@ -135,7 +135,7 @@ async function main(): Promise<void> {
     {
       value: "mcp",
       label: "MCP サーバー設定",
-      hint: `${installDir}/.mcp.json`,
+      hint: "claude mcp add 経由でインストール",
     },
     ...claudeMdTemplates.map((t) => ({
       value: `claude-md:${t}`,
@@ -436,7 +436,6 @@ async function main(): Promise<void> {
   }
 
   // MCP
-  const installedMcpEntries: ReturnType<typeof discoverMcpEntries> = [];
   if (selectedComponents.includes("mcp")) {
     const allEntries = discoverMcpEntries(REPO_DIR);
 
@@ -445,9 +444,7 @@ async function main(): Promise<void> {
       options: allEntries.map((e) => ({
         value: e.serverDir,
         label: e.serverDir,
-        hint: Object.keys(
-          (e.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {},
-        ).join(", "),
+        hint: `${e.command} ${e.args.join(" ")}`,
       })),
       initialValues: [],
       required: false,
@@ -463,26 +460,28 @@ async function main(): Promise<void> {
 
     if (selectedEntries.length > 0) {
       const s = spinner();
-      s.start("MCP サーバー設定をインストール中...");
-      const mcpDstPath = path.join(installDir, ".mcp.json");
-      let merged = 0;
-      let noop = 0;
+      s.start("MCP サーバーをインストール中...");
+      let installed = 0;
+      let failed = 0;
+      const failedMcps: string[] = [];
 
       for (const entry of selectedEntries) {
-        const servers = (entry.json as { mcpServers?: Record<string, unknown> }).mcpServers ?? {};
-        const result = mergeMcpJson(mcpDstPath, servers, {
+        const result = installMcp(entry, {
+          scope: isGlobal ? "global" : "local",
           dryRun: DRY_RUN,
         });
-        if (result.action === "merged") {
-          merged++;
-          installedMcpEntries.push(entry);
-        } else {
-          noop++;
-          installedMcpEntries.push(entry);
+        if (result.action === "installed") {
+          installed++;
+        } else if (result.action === "failed") {
+          failed++;
+          failedMcps.push(`${entry.name} (${result.reason})`);
         }
       }
 
-      s.stop(`MCP: ${merged} 個マージ、${noop} 個スキップ（計 ${selectedEntries.length} 個）`);
+      s.stop(`MCP: ${installed} 個インストール、${failed} 個失敗`);
+      for (const msg of failedMcps) {
+        log.warn(`  スキップ: ${msg}`);
+      }
     }
   }
 
@@ -534,13 +533,6 @@ async function main(): Promise<void> {
   for (const hookSet of installedHookSets) {
     if (hookSet.postInstallNote) {
       log.info(`\n[Hook: ${hookSet.name}] インストール後の作業:\n${hookSet.postInstallNote}`);
-    }
-  }
-
-  // Show post-install notes for installed MCP servers
-  for (const entry of installedMcpEntries) {
-    if (entry.postInstallNote) {
-      log.info(`\n[MCP: ${entry.serverDir}] インストール後の作業:\n${entry.postInstallNote}`);
     }
   }
 
