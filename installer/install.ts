@@ -20,6 +20,7 @@ import {
   discoverPlugins,
   discoverHookSets,
   discoverMcpEntries,
+  discoverMcpRecommendations,
   discoverClaudeMdTemplates,
   type PluginInfo,
 } from "./discover.js";
@@ -483,6 +484,16 @@ async function main(): Promise<void> {
         log.warn(`  スキップ: ${msg}`);
       }
     }
+  }
+
+  // MCP Recommendations (shown regardless of whether MCP was selected)
+  const mcpRecommendations = discoverMcpRecommendations(REPO_DIR);
+  if (mcpRecommendations.length > 0) {
+    const lines = mcpRecommendations.map(
+      (r) =>
+        `  - ${r.name}: ${r.description}\n    ${r.note}\n    ${r.url}\n    例: ${r.installHint}`,
+    );
+    log.info(`\nその他の便利な MCP サーバー:\n${lines.join("\n")}`);
   }
 
   // CLAUDE.md

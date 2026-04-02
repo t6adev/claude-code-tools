@@ -206,6 +206,48 @@ function parseMcpYaml(content: string): Omit<McpEntryInfo, "serverDir"> | null {
   };
 }
 
+export interface McpRecommendation {
+  name: string;
+  description: string;
+  note: string;
+  url: string;
+  installHint: string;
+}
+
+export function discoverMcpRecommendations(repoDir: string): McpRecommendation[] {
+  const yamlPath = path.join(repoDir, "tools", "mcp", "recommendations.yaml");
+  if (!fs.existsSync(yamlPath)) return [];
+
+  const content = fs.readFileSync(yamlPath, "utf-8");
+  return parseMcpRecommendations(content);
+}
+
+function parseMcpRecommendations(content: string): McpRecommendation[] {
+  const results: McpRecommendation[] = [];
+  // Split by top-level list items (- name:)
+  const entries = content.split(/^- name:/m).slice(1);
+
+  for (const entry of entries) {
+    const block = "name:" + entry;
+    const get = (key: string): string => {
+      const match = block.match(new RegExp(`^\\s*${key}:\\s*"?([^"\\n]*)"?`, "m"));
+      return match ? match[1].trim() : "";
+    };
+
+    const name = get("name");
+    const description = get("description");
+    const note = get("note");
+    const url = get("url");
+    const installHint = get("install_hint");
+
+    if (name && description && url) {
+      results.push({ name, description, note, url, installHint });
+    }
+  }
+
+  return results;
+}
+
 export function discoverClaudeMdTemplates(repoDir: string): string[] {
   const templatesDir = path.join(repoDir, "tools", "claude-md-templates");
   const results: string[] = [];

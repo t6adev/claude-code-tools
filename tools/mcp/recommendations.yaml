@@ -1,0 +1,8 @@
+# インストーラーでは自動インストールしないが、便利な MCP サーバーの紹介リスト
+# インストール完了後に Note として表示される
+
+- name: filesystem
+  description: ローカルファイルシステムへの安全なアクセスを提供する MCP サーバー
+  note: 許可するディレクトリをインストール時に指定する必要があります
+  url: https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem
+  install_hint: "claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path/to/allowed/directory"
