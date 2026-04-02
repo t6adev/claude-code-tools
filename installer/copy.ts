@@ -2,13 +2,25 @@ import * as fs from "fs";
 import * as path from "path";
 
 export interface CopyResult {
-  action: "copied" | "skipped";
+  action: "copied" | "skipped" | "updated";
   dst: string;
 }
 
-export function copyDir(src: string, dst: string, opts: { dryRun: boolean }): CopyResult {
+export function copyDir(
+  src: string,
+  dst: string,
+  opts: { dryRun: boolean; overwrite?: boolean },
+): CopyResult {
   if (fs.existsSync(dst)) {
-    return { action: "skipped", dst };
+    if (!opts.overwrite) {
+      return { action: "skipped", dst };
+    }
+    if (!opts.dryRun) {
+      fs.rmSync(dst, { recursive: true });
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.cpSync(src, dst, { recursive: true });
+    }
+    return { action: "updated", dst };
   }
 
   if (!opts.dryRun) {
@@ -22,10 +34,19 @@ export function copyDir(src: string, dst: string, opts: { dryRun: boolean }): Co
 export function copyFile(
   src: string,
   dst: string,
-  opts: { dryRun: boolean; executable?: boolean },
+  opts: { dryRun: boolean; executable?: boolean; overwrite?: boolean },
 ): CopyResult {
   if (fs.existsSync(dst)) {
-    return { action: "skipped", dst };
+    if (!opts.overwrite) {
+      return { action: "skipped", dst };
+    }
+    if (!opts.dryRun) {
+      fs.copyFileSync(src, dst);
+      if (opts.executable) {
+        fs.chmodSync(dst, 0o755);
+      }
+    }
+    return { action: "updated", dst };
   }
 
   if (!opts.dryRun) {

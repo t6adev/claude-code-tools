@@ -1,8 +1,19 @@
 #!/usr/bin/env node
+import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { fileURLToPath } from "url";
-import { intro, outro, select, multiselect, spinner, log, cancel, isCancel } from "@clack/prompts";
+import {
+  intro,
+  outro,
+  select,
+  multiselect,
+  confirm,
+  spinner,
+  log,
+  cancel,
+  isCancel,
+} from "@clack/prompts";
 import {
   discoverSkills,
   discoverAgents,
@@ -185,36 +196,83 @@ async function main(): Promise<void> {
 
   // Skills
   if (selectedComponents.includes("skills")) {
-    const s = spinner();
-    s.start("Skills をインストール中...");
     ensureDir(path.join(installDir, "skills"), { dryRun: DRY_RUN });
     const skills = discoverSkills(REPO_DIR);
+
+    // Check how many already exist
+    const existingSkills = skills.filter((skill) =>
+      fs.existsSync(path.join(installDir, "skills", skill.name)),
+    );
+
+    let overwriteSkills = false;
+    if (existingSkills.length > 0) {
+      const shouldUpdate = await confirm({
+        message: `既にインストール済みの Skills が ${existingSkills.length} 個あります。上書きして更新しますか？`,
+        initialValue: true,
+      });
+      if (isCancel(shouldUpdate)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+      overwriteSkills = shouldUpdate;
+    }
+
+    const s = spinner();
+    s.start("Skills をインストール中...");
     let copied = 0;
+    let updated = 0;
     let skipped = 0;
     for (const skill of skills) {
       const dst = path.join(installDir, "skills", skill.name);
-      const result = copyDir(skill.srcPath, dst, { dryRun: DRY_RUN });
+      const result = copyDir(skill.srcPath, dst, { dryRun: DRY_RUN, overwrite: overwriteSkills });
       if (result.action === "copied") copied++;
+      else if (result.action === "updated") updated++;
       else skipped++;
     }
-    s.stop(`Skills: ${copied} 個インストール、${skipped} 個スキップ（計 ${skills.length} 個）`);
+    const parts = [`${copied} 個インストール`];
+    if (updated > 0) parts.push(`${updated} 個更新`);
+    if (skipped > 0) parts.push(`${skipped} 個スキップ`);
+    s.stop(`Skills: ${parts.join("、")}（計 ${skills.length} 個）`);
   }
 
   // Agents
   if (selectedComponents.includes("agents")) {
-    const s = spinner();
-    s.start("Agents をインストール中...");
     ensureDir(path.join(installDir, "agents"), { dryRun: DRY_RUN });
     const agents = discoverAgents(REPO_DIR);
+
+    const existingAgents = agents.filter((agent) =>
+      fs.existsSync(path.join(installDir, "agents", agent.name)),
+    );
+
+    let overwriteAgents = false;
+    if (existingAgents.length > 0) {
+      const shouldUpdate = await confirm({
+        message: `既にインストール済みの Agents が ${existingAgents.length} 個あります。上書きして更新しますか？`,
+        initialValue: true,
+      });
+      if (isCancel(shouldUpdate)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+      overwriteAgents = shouldUpdate;
+    }
+
+    const s = spinner();
+    s.start("Agents をインストール中...");
     let copied = 0;
+    let updated = 0;
     let skipped = 0;
     for (const agent of agents) {
       const dst = path.join(installDir, "agents", agent.name);
-      const result = copyDir(agent.srcPath, dst, { dryRun: DRY_RUN });
+      const result = copyDir(agent.srcPath, dst, { dryRun: DRY_RUN, overwrite: overwriteAgents });
       if (result.action === "copied") copied++;
+      else if (result.action === "updated") updated++;
       else skipped++;
     }
-    s.stop(`Agents: ${copied} 個インストール、${skipped} 個スキップ（計 ${agents.length} 個）`);
+    const parts = [`${copied} 個インストール`];
+    if (updated > 0) parts.push(`${updated} 個更新`);
+    if (skipped > 0) parts.push(`${skipped} 個スキップ`);
+    s.stop(`Agents: ${parts.join("、")}（計 ${agents.length} 個）`);
   }
 
   // Plugins
@@ -271,11 +329,31 @@ async function main(): Promise<void> {
     const selectedHookSets = allHookSets.filter((hs) => selectedIds.includes(hs.name));
 
     if (selectedHookSets.length > 0) {
-      const s = spinner();
-      s.start("Hooks をインストール中...");
       const hooksDir = path.join(installDir, "hooks");
       ensureDir(hooksDir, { dryRun: DRY_RUN });
+
+      // Check how many scripts already exist
+      const existingScripts = selectedHookSets.flatMap((hs) =>
+        hs.scripts.filter((script) => fs.existsSync(path.join(hooksDir, script.name))),
+      );
+
+      let overwriteHooks = false;
+      if (existingScripts.length > 0) {
+        const shouldUpdate = await confirm({
+          message: `既にインストール済みの Hook スクリプトが ${existingScripts.length} 個あります。上書きして更新しますか？`,
+          initialValue: false,
+        });
+        if (isCancel(shouldUpdate)) {
+          cancel("キャンセルしました。");
+          process.exit(0);
+        }
+        overwriteHooks = shouldUpdate;
+      }
+
+      const s = spinner();
+      s.start("Hooks をインストール中...");
       let copied = 0;
+      let updated = 0;
       let skipped = 0;
       const copiedScripts: string[] = [];
 
@@ -285,9 +363,13 @@ async function main(): Promise<void> {
           const result = copyFile(script.srcPath, dst, {
             dryRun: DRY_RUN,
             executable: true,
+            overwrite: overwriteHooks,
           });
           if (result.action === "copied") {
             copied++;
+            copiedScripts.push(dst);
+          } else if (result.action === "updated") {
+            updated++;
             copiedScripts.push(dst);
           } else {
             skipped++;
@@ -297,7 +379,10 @@ async function main(): Promise<void> {
       }
 
       const totalScripts = selectedHookSets.reduce((n, hs) => n + hs.scripts.length, 0);
-      s.stop(`Hooks: ${copied} 個インストール、${skipped} 個スキップ（計 ${totalScripts} 個）`);
+      const parts = [`${copied} 個インストール`];
+      if (updated > 0) parts.push(`${updated} 個更新`);
+      if (skipped > 0) parts.push(`${skipped} 個スキップ`);
+      s.stop(`Hooks: ${parts.join("、")}（計 ${totalScripts} 個）`);
 
       if (copiedScripts.length > 0) {
         const chmodLines = copiedScripts.map((p) => `  chmod +x ${p}`).join("\n");
@@ -403,8 +488,6 @@ async function main(): Promise<void> {
 
   // CLAUDE.md
   if (claudeMdTemplate) {
-    const s = spinner();
-    s.start("CLAUDE.md を配置中...");
     const templateSrc = path.join(
       REPO_DIR,
       "tools",
@@ -413,12 +496,30 @@ async function main(): Promise<void> {
       "CLAUDE.md",
     );
     const dst = path.join(process.cwd(), "CLAUDE.md");
-    const result = copyFile(templateSrc, dst, { dryRun: DRY_RUN });
-    s.stop(
-      result.action === "copied"
-        ? `CLAUDE.md を配置しました（テンプレート: ${claudeMdTemplate}）`
-        : "CLAUDE.md は既に存在するためスキップしました",
-    );
+
+    let overwriteClaudeMd = false;
+    if (fs.existsSync(dst)) {
+      const shouldUpdate = await confirm({
+        message: "CLAUDE.md は既に存在します。上書きして更新しますか？",
+        initialValue: false,
+      });
+      if (isCancel(shouldUpdate)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+      overwriteClaudeMd = shouldUpdate;
+    }
+
+    const s = spinner();
+    s.start("CLAUDE.md を配置中...");
+    const result = copyFile(templateSrc, dst, { dryRun: DRY_RUN, overwrite: overwriteClaudeMd });
+    if (result.action === "copied") {
+      s.stop(`CLAUDE.md を配置しました（テンプレート: ${claudeMdTemplate}）`);
+    } else if (result.action === "updated") {
+      s.stop(`CLAUDE.md を更新しました（テンプレート: ${claudeMdTemplate}）`);
+    } else {
+      s.stop("CLAUDE.md は既に存在するためスキップしました");
+    }
   }
 
   // Show hook config merge summary
