@@ -463,8 +463,10 @@ async function main(): Promise<void> {
       const s = spinner();
       s.start("MCP サーバーをインストール中...");
       let installed = 0;
+      let updated = 0;
       let failed = 0;
       const failedMcps: string[] = [];
+      const updatedMcps: Array<{ name: string; previousConfig?: string; diff?: string }> = [];
 
       for (const entry of selectedEntries) {
         const result = installMcp(entry, {
@@ -473,15 +475,35 @@ async function main(): Promise<void> {
         });
         if (result.action === "installed") {
           installed++;
+        } else if (result.action === "updated") {
+          updated++;
+          updatedMcps.push({
+            name: result.name,
+            previousConfig: result.previousConfig,
+            diff: result.diff,
+          });
         } else if (result.action === "failed") {
           failed++;
           failedMcps.push(`${entry.name} (${result.reason})`);
         }
       }
 
-      s.stop(`MCP: ${installed} 個インストール、${failed} 個失敗`);
+      const mcpParts = [`${installed} 個インストール`];
+      if (updated > 0) mcpParts.push(`${updated} 個更新`);
+      if (failed > 0) mcpParts.push(`${failed} 個失敗`);
+      s.stop(`MCP: ${mcpParts.join("、")}`);
       for (const msg of failedMcps) {
         log.warn(`  スキップ: ${msg}`);
+      }
+      for (const mcp of updatedMcps) {
+        if (mcp.previousConfig) {
+          log.info(`[${mcp.name}] 更新前の設定:\n  ${mcp.previousConfig}`);
+        }
+        if (mcp.diff) {
+          log.info(`[${mcp.name}] 変更点:\n${mcp.diff}`);
+        } else if (mcp.previousConfig) {
+          log.info(`[${mcp.name}] 設定に差分はありません（再インストール）`);
+        }
       }
     }
   }
