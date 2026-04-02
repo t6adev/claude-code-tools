@@ -42,26 +42,27 @@ export function installMcp(
       args.push("--scope", "user");
     }
 
-    // env options
-    if (entry.env) {
-      for (const [key, value] of Object.entries(entry.env)) {
-        args.push("--env", `${key}=${value}`);
-      }
-    }
-
     // server name
     args.push(entry.name);
+
+    // env options (after server name to avoid variadic -e consuming the name)
+    if (entry.env) {
+      for (const [key, value] of Object.entries(entry.env)) {
+        args.push("-e", `${key}=${value}`);
+      }
+    }
 
     // -- command and args
     args.push("--", entry.command, ...entry.args);
 
     execFileSync("claude", args, { stdio: ["inherit", "inherit", "pipe"] });
     return { name: entry.name, action: "installed" };
-  } catch {
+  } catch (err) {
+    const stderr = (err as { stderr?: Buffer })?.stderr?.toString() ?? "";
     return {
       name: entry.name,
       action: "failed",
-      reason: "claude mcp add command failed",
+      reason: stderr.trim() || "claude mcp add command failed",
     };
   }
 }
