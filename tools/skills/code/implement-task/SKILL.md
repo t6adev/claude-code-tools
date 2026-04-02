@@ -217,6 +217,17 @@ cd ../<worktree-dir>
 
 - 以降のすべての作業（実装・検証・コミット）は worktree ディレクトリ内で行う
 
+#### worktree 作成後の事前準備
+
+worktree は依存関係がインストールされていない状態で作成されるため、コード変更に入る前にプロジェクト固有の事前準備を実行する:
+
+- **Node.js プロジェクト**: `pnpm install`（または `npm install` / `yarn install`）
+- **Go プロジェクト**: `go mod download`
+- **Python プロジェクト**: `pip install -e .` または `poetry install`
+- **Rust プロジェクト**: `cargo fetch`
+
+`package.json`、`go.mod`、`pyproject.toml` 等の存在を確認して適切なコマンドを選択する。
+
 #### checkout 方式の場合（従来方式）
 
 ```bash
@@ -277,6 +288,16 @@ git checkout -b <branch-name>
 ---
 
 ## Phase 6: コミットと PR 作成
+
+### リンター・フォーマッタの実行
+
+コミット前に、プロジェクトのリンター・フォーマッタを実行して問題がないことを確認する:
+
+1. `CLAUDE.md` に記載されたコマンドがあればそれを実行（最優先）
+2. `package.json` の `fix` / `fix:lint` / `fix:fmt` スクリプトがあれば実行
+3. 言語固有のデフォルト（`oxlint --fix`、`oxfmt`、`go fmt ./...` など）
+
+エラーがあれば修正してからコミットに進む。
 
 ### コミット
 
