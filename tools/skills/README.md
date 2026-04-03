@@ -10,17 +10,18 @@
 
 ## code
 
-| スキル                                         | コマンド                               | 説明                                                                             |
-| ---------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
-| [explain](code/explain/)                       | `/explain [file or function]`          | コードを平易な言葉で説明                                                         |
-| [pr-review-router](code/pr-review-router/)     | `/pr-review-router [intent]`           | レビュー意図を解析し code-review / pr-review-toolkit へルーティング              |
-| [node-project-setup](code/node-project-setup/) | `/node-project-setup [directory or .]` | pnpm・TypeScript・並列 check パターンで Node.js プロジェクトを設定               |
-| [start-webapp](code/start-webapp/)             | `/start-webapp`                        | 新規Webアプリの立ち上げウィザード（ヒアリング→設計→タスク化→GitHub Project登録） |
-| [implement-task](code/implement-task/)         | `/implement-task [issue-url\|#number]` | GitHub Issue を起点に実装・検証・PR作成まで一貫して実行                          |
-| [debug-assist](code/debug-assist/)             | `/debug-assist [error-message]`        | エラー・スタックトレースを解析して原因仮説と修正方針を提示                       |
-| [impact-analysis](code/impact-analysis/)       | `/impact-analysis [file\|symbol]`      | ファイル・シンボルの変更前に影響を受ける依存元とテストを列挙                     |
-| [analyze-project](code/analyze-project/)       | `/analyze-project [goal]`              | 既存プロジェクトを解析してCLAUDE.md・architecture.md・migration-plan.mdを生成    |
-| [task-breakdown](code/task-breakdown/)         | `/task-breakdown [project-number]`     | 既存プロジェクトのペインポイントを洗い出し、GitHub IssueとProject Boardに登録    |
+| スキル                                             | コマンド                               | 説明                                                                             |
+| -------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| [explain](code/explain/)                           | `/explain [file or function]`          | コードを平易な言葉で説明                                                         |
+| [pr-review-router](code/pr-review-router/)         | `/pr-review-router [intent]`           | レビュー意図を解析し code-review / pr-review-toolkit へルーティング              |
+| [node-project-setup](code/node-project-setup/)     | `/node-project-setup [directory or .]` | pnpm・TypeScript・並列 check パターンで Node.js プロジェクトを設定               |
+| [start-webapp](code/start-webapp/)                 | `/start-webapp`                        | 新規Webアプリの立ち上げウィザード（ヒアリング→設計→タスク化→GitHub Project登録） |
+| [implement-task](code/implement-task/)             | `/implement-task [issue-url\|#number]` | GitHub Issue を起点に実装・検証・PR作成まで一貫して実行                          |
+| [debug-assist](code/debug-assist/)                 | `/debug-assist [error-message]`        | エラー・スタックトレースを解析して原因仮説と修正方針を提示                       |
+| [impact-analysis](code/impact-analysis/)           | `/impact-analysis [file\|symbol]`      | ファイル・シンボルの変更前に影響を受ける依存元とテストを列挙                     |
+| [analyze-project](code/analyze-project/)           | `/analyze-project [goal]`              | 既存プロジェクトを解析してCLAUDE.md・architecture.md・migration-plan.mdを生成    |
+| [task-breakdown](code/task-breakdown/)             | `/task-breakdown [project-number]`     | 既存プロジェクトのペインポイントを洗い出し、GitHub IssueとProject Boardに登録    |
+| [implement-tasks-auto](code/implement-tasks-auto/) | `/implement-tasks-auto [#1 #2 #3]`     | GitHub Issueリストを依存関係順にworktreeで自律実装しPR作成まで一括実行           |
 
 ## docs
 
