@@ -232,11 +232,23 @@ gh pr view <pr-number> --json state --jq '.state'
 ベースブランチから worktree を作成する。
 詳細は `${CLAUDE_SKILL_DIR}/references/worktree-workflow.md` を参照する。
 
+`../<worktree-dir>` の `..` は **リポジトリルート（cwd）の親ディレクトリ**を指す。
+`<worktree-dir>` はブランチ名の `/` を `-` に置換した文字列のみで、**余計なディレクトリ階層を追加しない**。
+
 ```bash
 git fetch origin
 git worktree add ../<worktree-dir> -b <branch-name> <base>
 cd ../<worktree-dir>
 ```
+
+**具体例:** リポジトリが `~/workspace/app-worktree/app` にある場合:
+
+| ブランチ名         | コマンド                                                              | 作成先パス                                  |
+| ------------------ | --------------------------------------------------------------------- | ------------------------------------------- |
+| `feat/10-add-api`  | `git worktree add ../feat-10-add-api -b feat/10-add-api origin/main` | `~/workspace/app-worktree/feat-10-add-api`  |
+| `fix/20-fix-login` | `git worktree add ../fix-20-fix-login -b fix/20-fix-login origin/main` | `~/workspace/app-worktree/fix-20-fix-login` |
+
+**注意:** `../app-worktree/feat-10-add-api` のように親ディレクトリ名を含めてはならない。
 
 ### 2. 事前準備
 
