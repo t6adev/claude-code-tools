@@ -11,7 +11,8 @@
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
     "filesystem": {
-      "allowWrite": ["~/.local/share/pnpm"]
+      "allowWrite": ["~/.local/share/pnpm"],
+      "allowRead": ["~/.config/gh"]
     },
     "network": {
       "allowedDomains": [
@@ -20,7 +21,9 @@
         "*.githubusercontent.com",
         "registry.npmjs.org",
         "registry.yarnpkg.com"
-      ]
-    }
+      ],
+      "allowLocalBinding": true
+    },
+    "enableWeakerNetworkIsolation": true
   }
 }

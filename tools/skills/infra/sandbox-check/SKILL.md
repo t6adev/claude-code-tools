@@ -24,9 +24,15 @@ sandbox を有効にした状態で開発を行う場合、ネットワーク制
 各ファイルから以下を抽出する:
 
 - `sandbox.enabled` — sandbox が有効か
-- `sandbox.network.allowedDomains`（または `allowedHosts`）— 許可されたネットワークホスト
-- `sandbox.filesystem.allowWrite`（または `filesystem.write.allowOnly`）— 書き込み許可パス
-- `sandbox.autoAllowBashIfSandboxed` — Bash 自動許可設定
+- `sandbox.autoAllowBashIfSandboxed` — Bash 自動許可設定（デフォルト: true）
+- `sandbox.excludedCommands` — sandbox 外で実行するコマンド
+- `sandbox.network.allowedDomains` — 許可されたネットワークドメイン（ワイルドカード対応）
+- `sandbox.network.allowLocalBinding` — localhost ポートバインドの許可（macOS のみ、デフォルト: false）
+- `sandbox.network.allowUnixSockets` — 許可された Unix ソケットパス
+- `sandbox.filesystem.allowWrite` — 追加の書き込み許可パス
+- `sandbox.filesystem.denyWrite` — 書き込み拒否パス
+- `sandbox.filesystem.denyRead` — 読み取り拒否パス
+- `sandbox.enableWeakerNetworkIsolation` — TLS trust service へのアクセス許可（macOS のみ）
 - `permissions.allow` — 許可済みツールパターン
 
 sandbox が無効、または設定が見つからない場合はその旨をレポートして終了する。
@@ -74,7 +80,7 @@ sandbox が無効、または設定が見つからない場合はその旨をレ
 
 ### 3a: ネットワーク制約チェック
 
-開発フローが必要とする外部ホストが `sandbox.network.allowedDomains`（または `allowedHosts`）に含まれているか確認する。
+開発フローが必要とする外部ホストが `sandbox.network.allowedDomains` に含まれているか確認する。
 
 チェック観点:
 
@@ -82,7 +88,7 @@ sandbox が無効、または設定が見つからない場合はその旨をレ
 - **GitHub 関連**: `gh` CLI → `github.com`, `api.github.com`、raw コンテンツ → `*.githubusercontent.com`
 - **テストの外部アクセス**: E2E テストが外部 API を呼ぶ場合のホスト
 - **MCP サーバー**: Playwright MCP → ブラウザダウンロード先、その他 MCP のエンドポイント
-- **開発サーバー**: `localhost` はデフォルトで許可されているため通常は問題ない
+- **ローカルポートバインド**: テストフレームワークやビルドツールが localhost にサーバーを起動する場合、`network.allowLocalBinding: true` が必要（macOS のみ）。wrangler、Vite dev server、Playwright テストサーバー等が該当
 
 ワイルドカード（`*.example.com`）のマッチングを考慮する。
 
@@ -150,7 +156,8 @@ sandbox 制約に起因しない失敗（テストコードのバグ等）は sa
 判別のヒント:
 
 - `ENOTFOUND`, `ECONNREFUSED`, `fetch failed`, `network timeout` → `NETWORK`
-- `EACCES`, `EPERM`, `permission denied`, `read-only file system` → `FILESYSTEM`
+- `EPERM` + `bind` / `listen` / `127.0.0.1` → `NETWORK`（ローカルポートバインド制限、`allowLocalBinding: true` で解決）
+- `EACCES`, `EPERM` + ファイルパス, `permission denied`, `read-only file system` → `FILESYSTEM`
 - 上記に該当しない → `OTHER`（sandbox の問題ではない可能性が高い）
 
 ---
@@ -165,7 +172,20 @@ sandbox 制約に起因しない失敗（テストコードのバグ等）は sa
 2. **静的チェック結果** — ネットワーク制約・ファイルシステム制約のテーブル
 3. **実行検証結果** — 各コマンドの成功/失敗と原因分類（Phase 4 をスキップした場合はその旨を記載）
 4. **問題の概要** — 検出された問題の影響
-5. **推奨アクション** — settings.json への具体的な JSON スニペット
+5. **推奨アクション** — sandbox を有効にしたまま問題を解決するための具体的な設定変更
+
+### 推奨アクションの原則
+
+このスキルの目的は **sandbox を有効にしたまま開発フローを動かせるようにする** こと。以下の原則に従う:
+
+1. **sandbox 設定の変更で解決できる場合、その具体的な JSON スニペットを1つだけ提示する**。複数の代替案は不要。
+2. **sandbox の設定では解決できない問題**の場合、その旨を明確に伝え、「sandbox を無効にする」は最終手段として1行で言及するのみ。
+3. **推測で設定オプションを提案しない**。提案する設定キーが実際に存在し機能することを、公式ドキュメント（https://docs.anthropic.com → https://code.claude.com/docs/en/settings）で確認する。確認できない場合は「このオプションの存在は未確認」と明記する。
+4. **各設定の効果を正確に記述する**。混同しやすい設定:
+   - `excludedCommands` — sandbox **外**でコマンドを実行する。sandbox 内の制約をバイパスするのではなく、sandbox を完全にスキップする
+   - `enableWeakerNetworkIsolation` — TLS trust service (`com.apple.trustd.agent`) へのアクセスを許可する。アウトバウンド接続やローカルバインドの許可ではない
+   - `network.allowLocalBinding` — localhost ポートへのバインド（listen）を許可する（macOS のみ）。wrangler 等のローカルサーバー起動に必要
+   - `network.allowedDomains` — アウトバウンドのネットワーク通信を許可するドメイン
 
 **注意**: レポートのみ出力する。settings.json の自動変更は行わない。
 

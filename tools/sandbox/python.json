@@ -10,6 +10,9 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "allowRead": ["~/.config/gh"]
+    },
     "network": {
       "allowedDomains": [
         "github.com",
@@ -17,7 +20,9 @@
         "*.githubusercontent.com",
         "pypi.org",
         "files.pythonhosted.org"
-      ]
-    }
+      ],
+      "allowLocalBinding": true
+    },
+    "enableWeakerNetworkIsolation": true
   }
 }

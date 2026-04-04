@@ -85,6 +85,23 @@ sandbox 設定の互換性チェック時に参照するリファレンス。
 | ---------------- | ------------------------------------- | -------------------------------- |
 | git worktree add | プロジェクトの親ディレクトリ（`../`） | プロジェクト外への書き込みが必要 |
 
+---
+
+## ローカルポートバインドが必要なツール
+
+以下のツールはローカルにサーバーを起動するため、macOS sandbox では `network.allowLocalBinding: true` が必要。
+
+| ツール                        | 用途                       | 備考                                   |
+| ----------------------------- | -------------------------- | -------------------------------------- |
+| wrangler (Cloudflare Workers) | `pnpm test` / `pnpm build` | `@cloudflare/vitest-pool-workers` 含む |
+| Vite dev server               | `pnpm dev`                 | HMR サーバー                           |
+| Playwright test server        | `pnpm test`                | テストサーバー起動                     |
+| Next.js dev server            | `pnpm dev`                 | 開発サーバー                           |
+| webpack-dev-server            | `pnpm dev`                 | 開発サーバー                           |
+| Storybook                     | `pnpm storybook`           | UI コンポーネント開発                  |
+
+---
+
 ### 一時ファイルに関する注意
 
 sandbox 環境では `/tmp` への直接書き込みが制限される場合がある。テストコードが `/tmp` をハードコードしている場合、`$TMPDIR` 環境変数を使用するように修正する必要がある。sandbox モードでは `$TMPDIR` が自動的に書き込み可能なディレクトリに設定される。
