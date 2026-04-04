@@ -37,6 +37,12 @@
 | [subagent-strategy](meta/subagent-strategy/) | `/subagent-strategy` | サブエージェントを活用した並列実行・調査委譲・コンテキスト管理 |
 | [self-improvement](meta/self-improvement/)   | `/self-improvement`  | 修正・指摘を受けた際の学習記録と自己改善ループ                 |
 
+## infra
+
+| スキル                                | コマンド         | 説明                                                 |
+| ------------------------------------- | ---------------- | ---------------------------------------------------- |
+| [sandbox-check](infra/sandbox-check/) | `/sandbox-check` | sandbox 設定とプロジェクト環境の互換性を事前チェック |
+
 ## インストール方法
 
 各スキルの `README.md` を参照してください。

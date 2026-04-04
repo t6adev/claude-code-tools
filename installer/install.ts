@@ -609,9 +609,7 @@ async function main(): Promise<void> {
               "  2. Claude Code を --sandbox フラグ付きで起動するか、",
               "     上記設定の sandbox.enabled を利用してください",
               "",
-              ...(template.notes.length > 0
-                ? ["注意:", ...template.notes, ""]
-                : []),
+              ...(template.notes.length > 0 ? ["注意:", ...template.notes, ""] : []),
             ].join("\n"),
           );
         }
