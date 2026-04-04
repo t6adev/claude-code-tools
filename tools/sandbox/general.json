@@ -1,0 +1,12 @@
+{
+  "name": "General",
+  "description": "汎用的な開発環境向けの sandbox 推奨設定",
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": ["github.com", "api.github.com", "*.githubusercontent.com"]
+    }
+  }
+}

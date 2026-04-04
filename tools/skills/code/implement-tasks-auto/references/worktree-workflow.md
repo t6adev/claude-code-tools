@@ -134,6 +134,64 @@ gh pr create --base feat/10-db-schema --title "..." --body "..."
 
 ---
 
+## 実行中の依存先 PR マージへの対応
+
+ユーザーや CI が親 PR をマージすると、子 Issue のベースブランチが消える。
+次レベルの Agent を起動する前に、前レベルの PR の状態を確認し対応する。
+
+### 検出
+
+```bash
+gh pr view <parent-pr-number> --json state --jq '.state'
+# "MERGED" ならマージ済み
+```
+
+### 対応手順
+
+#### 子 worktree がまだ作成されていない場合
+
+ベースを `origin/main` に変更して worktree を作成する:
+
+```bash
+git fetch origin main
+git worktree add ../<worktree-dir> -b <branch-name> origin/main
+```
+
+#### 子 worktree が既に存在する場合（ベースが旧親ブランチ）
+
+```bash
+cd ../<child-worktree-dir>
+git fetch origin main
+git rebase origin/main
+# コンフリクトがあれば解消する
+```
+
+#### 子 PR が既に作成済みの場合
+
+PR のベースブランチを `main` に変更する:
+
+```bash
+gh pr edit <child-pr-number> --base main
+```
+
+コンフリクトがある場合は worktree 内でリベースしてプッシュする:
+
+```bash
+cd ../<child-worktree-dir>
+git fetch origin main
+git rebase origin/main
+# コンフリクト解消後
+git push --force-with-lease
+```
+
+### 注意事項
+
+- マージ済みの親ブランチはリモートから削除されている可能性がある。`git fetch --prune` でローカル参照を整理する
+- 複数の子 PR がある場合、すべてのベースを更新する
+- チェーン依存（A → B → C）で A がマージされた場合、B のベースのみ更新すれば十分。C は B に依存しているため影響を受けない
+
+---
+
 ## マージ後のクリーンアップ
 
 PR がマージされた worktree は以下の手順で削除する:

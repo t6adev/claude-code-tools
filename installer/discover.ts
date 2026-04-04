@@ -248,6 +248,40 @@ function parseMcpRecommendations(content: string): McpRecommendation[] {
   return results;
 }
 
+export interface SandboxTemplateInfo {
+  id: string;
+  name: string;
+  description: string;
+  sandbox: Record<string, unknown>;
+}
+
+export function discoverSandboxTemplates(repoDir: string): SandboxTemplateInfo[] {
+  const sandboxDir = path.join(repoDir, "tools", "sandbox");
+  const results: SandboxTemplateInfo[] = [];
+
+  if (!fs.existsSync(sandboxDir)) return results;
+
+  for (const file of fs.readdirSync(sandboxDir)) {
+    if (!file.endsWith(".json")) continue;
+    const filePath = path.join(sandboxDir, file);
+    const json = JSON.parse(fs.readFileSync(filePath, "utf-8")) as {
+      name?: string;
+      description?: string;
+      sandbox?: Record<string, unknown>;
+    };
+    if (json.name && json.sandbox) {
+      results.push({
+        id: file.replace(/\.json$/, ""),
+        name: json.name,
+        description: json.description ?? "",
+        sandbox: json.sandbox,
+      });
+    }
+  }
+
+  return results;
+}
+
 export function discoverClaudeMdTemplates(repoDir: string): string[] {
   const templatesDir = path.join(repoDir, "tools", "claude-md-templates");
   const results: string[] = [];

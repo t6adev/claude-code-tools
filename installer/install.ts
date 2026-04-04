@@ -22,6 +22,7 @@ import {
   discoverMcpEntries,
   discoverMcpRecommendations,
   discoverClaudeMdTemplates,
+  discoverSandboxTemplates,
   type PluginInfo,
 } from "./discover.js";
 import { copyDir, copyFile, ensureDir } from "./copy.js";
@@ -566,6 +567,56 @@ async function main(): Promise<void> {
   for (const hookSet of installedHookSets) {
     if (hookSet.postInstallNote) {
       log.info(`\n[Hook: ${hookSet.name}] インストール後の作業:\n${hookSet.postInstallNote}`);
+    }
+  }
+
+  // Sandbox recommended settings
+  const sandboxTemplates = discoverSandboxTemplates(REPO_DIR);
+  if (sandboxTemplates.length > 0) {
+    const showSandbox = await confirm({
+      message: "Sandbox 推奨設定を表示しますか？",
+      initialValue: false,
+    });
+
+    if (!isCancel(showSandbox) && showSandbox) {
+      const templateId = await select({
+        message: "プロジェクトの種類を選んでください",
+        options: sandboxTemplates.map((t) => ({
+          value: t.id,
+          label: t.name,
+          hint: t.description,
+        })),
+      });
+
+      if (!isCancel(templateId)) {
+        const template = sandboxTemplates.find((t) => t.id === templateId);
+        if (template) {
+          const settingsPath = isGlobal ? "~/.claude/settings.json" : ".claude/settings.json";
+          const json = JSON.stringify({ sandbox: template.sandbox }, null, 2);
+
+          log.info(
+            [
+              "",
+              "以下の設定を settings.json に追加すると、sandbox モードで",
+              "開発に必要なネットワークアクセスを許可できます。",
+              "",
+              `対象ファイル: ${settingsPath}`,
+              "",
+              json,
+              "",
+              "手順:",
+              `  1. 上記 JSON を ${settingsPath} にマージしてください`,
+              "  2. Claude Code を --sandbox フラグ付きで起動するか、",
+              "     上記設定の sandbox.enabled を利用してください",
+              "",
+              "注意: git worktree をプロジェクト外に作成する場合は、",
+              "filesystem.allowWrite にそのディレクトリを追加してください。",
+              '例: "filesystem": { "allowWrite": ["../my-worktrees"] }',
+              "",
+            ].join("\n"),
+          );
+        }
+      }
     }
   }
 

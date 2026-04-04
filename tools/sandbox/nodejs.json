@@ -1,0 +1,21 @@
+{
+  "name": "Node.js",
+  "description": "Node.js プロジェクト向けの sandbox 推奨設定",
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "allowWrite": ["~/.local/share/pnpm"]
+    },
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "api.github.com",
+        "*.githubusercontent.com",
+        "registry.npmjs.org",
+        "registry.yarnpkg.com"
+      ]
+    }
+  }
+}
