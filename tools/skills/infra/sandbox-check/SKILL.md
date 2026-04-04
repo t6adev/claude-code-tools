@@ -1,6 +1,6 @@
 ---
 name: sandbox-check
-description: This skill should be used when the user asks to "sandboxの互換性をチェックして", "sandbox設定を確認して", "このプロジェクトでsandboxが使えるか調べて", "check sandbox compatibility", "verify sandbox settings", or wants to ensure their development workflow works within Claude Code's sandbox restrictions before starting work.
+description: This skill should be used when the user asks to "sandboxの互換性をチェックして", "sandbox設定を確認して", "このプロジェクトでsandboxが使えるか調べて", "sandboxでコマンドが失敗する", "check sandbox compatibility", "verify sandbox settings", "sandbox is blocking my commands", or wants to ensure their development workflow works within Claude Code's sandbox restrictions — either proactively before starting work or reactively after encountering sandbox-related failures.
 argument-hint: "(no args = auto-detect from project files)"
 allowed-tools: Bash, Read, Glob, Grep
 ---
@@ -68,9 +68,9 @@ sandbox が無効、または設定が見つからない場合はその旨をレ
 
 ---
 
-## Phase 3: 互換性チェック
+## Phase 3: 静的互換性チェック
 
-収集した開発フローの各項目について、sandbox 制約との適合性を検証する。
+収集した開発フローの各項目について、sandbox 制約との適合性を静的に検証する。
 
 ### 3a: ネットワーク制約チェック
 
@@ -106,53 +106,66 @@ sandbox が無効、または設定が見つからない場合はその旨をレ
 
 ---
 
-## Phase 4: レポート出力
+## Phase 4: 実行検証
 
-チェック結果をユーザーに以下の形式でレポートする。
+静的チェックだけでは検出できない問題がある（暗黙の DNS 解決、ライブラリ内部の外部通信、ビルドツールのキャッシュ書き込み先等）。Phase 2 で収集したコマンドを実際に sandbox 環境内で実行し、問題を検出する。
 
-### レポート構成
+### 4a: 実行候補の提示と確認
+
+Phase 2 で収集したコマンドを一覧にしてユーザーに提示し、実行許可を求める。
+
+提示形式:
 
 ```
-## Sandbox 互換性チェック結果
+## 実行検証の候補コマンド
 
-### 環境情報
-- Sandbox: 有効/無効
-- 設定ファイル: (検出されたファイル一覧)
+以下のコマンドを sandbox 環境内で実際に実行し、制約による失敗がないか検証します。
+実行してもよいですか？
 
-### ネットワーク制約
-| 必要なホスト | 用途 | 許可状況 |
-|---|---|---|
-| registry.npmjs.org | pnpm install | OK |
-| api.example.com | E2E テスト | NG - 未許可 |
+| # | コマンド | 用途 | リスク |
+|---|---------|------|--------|
+| 1 | pnpm install | 依存インストール | 低（読み取り中心） |
+| 2 | pnpm test | テスト実行 | 低（ローカル実行） |
+| 3 | pnpm build | ビルド | 低（ローカル実行） |
+| 4 | pnpm lint | リント | 低（ローカル実行） |
 
-### ファイルシステム制約
-| パス | 用途 | 許可状況 |
-|---|---|---|
-| $TMPDIR | テスト一時ファイル | OK |
-| ~/.cache/ms-playwright | Playwright ブラウザ | NG - 未許可 |
-
-### 問題の概要
-- (問題がある場合) 具体的な問題点と影響
-- (問題がない場合) "現在の sandbox 設定で開発フローに問題は検出されませんでした"
-
-### 推奨アクション
-- (必要に応じて) settings.json への追加設定例
+- 全て実行 / 番号を選択 / スキップ
 ```
 
-推奨アクションでは、具体的な JSON スニペットを提示する。例:
+**ユーザーがスキップを選択した場合は Phase 5 に進む。**
 
-```json
-{
-  "sandbox": {
-    "network": {
-      "allowedDomains": ["api.example.com"]
-    },
-    "filesystem": {
-      "allowWrite": ["~/.cache/ms-playwright"]
-    }
-  }
-}
-```
+### 4b: コマンド実行と結果収集
+
+ユーザーが許可したコマンドを順番に実行する。各コマンドについて以下を記録する:
+
+- **成功/失敗**: exit code
+- **失敗時のエラー内容**: stderr の関連部分（ネットワークエラー、パーミッションエラー等）
+- **失敗の原因分類**:
+  - `NETWORK` — ホスト名解決失敗、接続拒否、タイムアウト等
+  - `FILESYSTEM` — 書き込み拒否、パーミッションエラー等
+  - `OTHER` — sandbox 制約以外の原因（コードのバグ等）
+
+sandbox 制約に起因しない失敗（テストコードのバグ等）は sandbox 互換性の問題として報告しない。エラーメッセージから原因を判別する。
+
+判別のヒント:
+
+- `ENOTFOUND`, `ECONNREFUSED`, `fetch failed`, `network timeout` → `NETWORK`
+- `EACCES`, `EPERM`, `permission denied`, `read-only file system` → `FILESYSTEM`
+- 上記に該当しない → `OTHER`（sandbox の問題ではない可能性が高い）
+
+---
+
+## Phase 5: レポート出力
+
+`references/report-template.md` のテンプレートに従い、チェック結果をユーザーにレポートする。
+
+レポートには以下のセクションを含める:
+
+1. **環境情報** — sandbox の有効/無効、検出された設定ファイル
+2. **静的チェック結果** — ネットワーク制約・ファイルシステム制約のテーブル
+3. **実行検証結果** — 各コマンドの成功/失敗と原因分類（Phase 4 をスキップした場合はその旨を記載）
+4. **問題の概要** — 検出された問題の影響
+5. **推奨アクション** — settings.json への具体的な JSON スニペット
 
 **注意**: レポートのみ出力する。settings.json の自動変更は行わない。
 
@@ -163,3 +176,4 @@ sandbox が無効、または設定が見つからない場合はその旨をレ
 ### Reference Files
 
 - **`references/common-hosts.md`** — よくある開発ツール・フレームワークが必要とするネットワークホストとファイルシステムパスの一覧
+- **`references/report-template.md`** — Phase 5 で出力するレポートのテンプレートと JSON スニペット例

@@ -17,13 +17,13 @@ sandbox 設定の互換性チェック時に参照するリファレンス。
 
 ### GitHub 関連
 
-| 用途            | 必要なホスト                                           | 備考                  |
-| --------------- | ------------------------------------------------------ | --------------------- |
-| git clone/push  | `github.com`                                           | Git 操作              |
-| gh CLI          | `api.github.com`                                       | GitHub API            |
-| raw コンテンツ  | `raw.githubusercontent.com`, `*.githubusercontent.com` | README 画像等         |
-| GitHub Actions  | `objects.githubusercontent.com`                        | アーティファクト      |
-| GitHub Packages | `npm.pkg.github.com`                                   | GitHub npm レジストリ |
+| 用途            | 必要なホスト                    | 備考                  |
+| --------------- | ------------------------------- | --------------------- |
+| git clone/push  | `github.com`                    | Git 操作              |
+| gh CLI          | `api.github.com`                | GitHub API            |
+| raw コンテンツ  | `*.githubusercontent.com`       | README 画像等         |
+| GitHub Actions  | `objects.githubusercontent.com` | アーティファクト      |
+| GitHub Packages | `npm.pkg.github.com`            | GitHub npm レジストリ |
 
 ### テストツール
 
