@@ -252,6 +252,7 @@ export interface SandboxTemplateInfo {
   id: string;
   name: string;
   description: string;
+  notes: string[];
   sandbox: Record<string, unknown>;
 }
 
@@ -267,6 +268,7 @@ export function discoverSandboxTemplates(repoDir: string): SandboxTemplateInfo[]
     const json = JSON.parse(fs.readFileSync(filePath, "utf-8")) as {
       name?: string;
       description?: string;
+      notes?: string[];
       sandbox?: Record<string, unknown>;
     };
     if (json.name && json.sandbox) {
@@ -274,6 +276,7 @@ export function discoverSandboxTemplates(repoDir: string): SandboxTemplateInfo[]
         id: file.replace(/\.json$/, ""),
         name: json.name,
         description: json.description ?? "",
+        notes: json.notes ?? [],
         sandbox: json.sandbox,
       });
     }

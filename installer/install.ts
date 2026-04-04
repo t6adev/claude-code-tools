@@ -609,10 +609,9 @@ async function main(): Promise<void> {
               "  2. Claude Code を --sandbox フラグ付きで起動するか、",
               "     上記設定の sandbox.enabled を利用してください",
               "",
-              "注意: git worktree をプロジェクト外に作成する場合は、",
-              "filesystem.allowWrite にそのディレクトリを追加してください。",
-              '例: "filesystem": { "allowWrite": ["../my-worktrees"] }',
-              "",
+              ...(template.notes.length > 0
+                ? ["注意:", ...template.notes, ""]
+                : []),
             ].join("\n"),
           );
         }

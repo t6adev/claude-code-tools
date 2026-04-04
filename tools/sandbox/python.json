@@ -1,6 +1,11 @@
 {
   "name": "Python",
   "description": "Python プロジェクト向けの sandbox 推奨設定",
+  "notes": [
+    "git worktree をプロジェクト外に作成する場合は、",
+    "filesystem.allowWrite にそのディレクトリを追加してください。",
+    "例: \"filesystem\": { \"allowWrite\": [\"../\"] }"
+  ],
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,

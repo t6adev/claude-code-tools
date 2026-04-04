@@ -68,6 +68,21 @@ claude --dangerously-skip-permissions
 > **注意**: settings.json の変更はセッション開始時に読み込まれる。
 > 設定を変更した場合は Claude Code を再起動すること。
 
+### Sandbox 環境での追加設定
+
+Sandbox が有効な場合、worktree はリポジトリの親ディレクトリ（`../`）に作成されるため、デフォルトでは書き込みがブロックされる。
+プロジェクトの `.claude/settings.json` に以下を追加する:
+
+```json
+{
+  "sandbox": {
+    "filesystem": {
+      "allowWrite": ["../"]
+    }
+  }
+}
+```
+
 ## 動作の概要
 
 ```
