@@ -27,6 +27,7 @@ usage() {
   echo "使い方:" >&2
   echo "  $0 <parent-dir> <source> <file1> [file2] ... [-- <target1> ...]" >&2
   echo "  $0 <parent-dir> --new <source> [-- <target1> ...]" >&2
+  echo "  --force を追加すると package.json 等も横展開対象にする" >&2
   exit 1
 }
 
