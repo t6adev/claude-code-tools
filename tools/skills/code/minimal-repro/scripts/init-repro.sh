@@ -113,7 +113,7 @@ PKGJSON
   sed -i.bak "s/PATTERN/$pattern/g" "$dir/package.json" && rm -f "$dir/package.json.bak"
 
   cat > "$dir/repro.ts" <<'REPRO'
-// TODO: 問題を再現する最小コードをここに記述する
+// TODO: Write minimal reproduction code here
 console.log("repro: PATTERN");
 REPRO
   sed -i.bak "s/PATTERN/$pattern/g" "$dir/repro.ts" && rm -f "$dir/repro.ts.bak"
@@ -121,24 +121,24 @@ REPRO
   cat > "$dir/README.md" <<README
 # $pattern
 
-## 目的
+## Purpose
 
-<!-- このパターンで何を確認するか -->
+<!-- What this pattern verifies -->
 
-## 再現手順
+## Steps to Reproduce
 
 \`\`\`bash
 pnpm install
 pnpm run repro
 \`\`\`
 
-## 期待する結果
+## Expected Behavior
 
-<!-- 正常な場合にどうなるべきか -->
+<!-- What should happen -->
 
-## 実際の結果
+## Actual Behavior
 
-<!-- 実行後に記入 -->
+<!-- Fill in after running -->
 README
 
   echo "作成完了: $dir"
