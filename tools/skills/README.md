@@ -22,6 +22,7 @@
 | [analyze-project](code/analyze-project/)           | `/analyze-project [goal]`              | 既存プロジェクトを解析してCLAUDE.md・architecture.md・migration-plan.mdを生成    |
 | [task-breakdown](code/task-breakdown/)             | `/task-breakdown [project-number]`     | 既存プロジェクトのペインポイントを洗い出し、GitHub IssueとProject Boardに登録    |
 | [implement-tasks-auto](code/implement-tasks-auto/) | `/implement-tasks-auto [#1 #2 #3]`     | GitHub Issueリストを依存関係順にworktreeで自律実装しPR作成まで一括実行           |
+| [minimal-repro](code/minimal-repro/)               | `/minimal-repro [問題の説明]`          | 問題の切り分けのため最小再現環境を複数パターン一括生成                           |
 
 ## docs
 
