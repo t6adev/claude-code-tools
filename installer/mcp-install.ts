@@ -241,9 +241,9 @@ export function installMcp(
           ? mergeAllowedProjects(entry, oldConfig, opts.projectDir)
           : (entry.env ?? {});
 
-      // allowedScripts があれば既存の ALLOWED_SCRIPTS にマージ
-      if (opts.allowedScripts?.length && entry.env && "ALLOWED_SCRIPTS" in entry.env) {
-        mergedEnv = mergeAllowedScripts(mergedEnv, oldConfig, opts.allowedScripts);
+      // ALLOWED_SCRIPTS をマージ（新規スクリプトが無くても既存値を保持する）
+      if (entry.env && "ALLOWED_SCRIPTS" in entry.env) {
+        mergedEnv = mergeAllowedScripts(mergedEnv, oldConfig, opts.allowedScripts ?? []);
       }
 
       const newConfig = formatNewConfig({ ...entry, env: mergedEnv });
