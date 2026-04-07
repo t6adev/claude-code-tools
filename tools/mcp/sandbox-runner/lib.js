@@ -7,11 +7,18 @@ import { z } from "zod";
 const MAX_TIMEOUT_MS = 600_000; // 10 minutes
 const SCRIPT_NAME_RE = /^[a-zA-Z0-9_:.-]+$/;
 
-export function createServer({ allowedProjects = [] } = {}) {
+export function createServer({ allowedProjects = [], allowedScripts = [] } = {}) {
   if (allowedProjects.length === 0) {
     process.stderr.write(
       "[sandbox-runner] WARNING: ALLOWED_PROJECTS is empty. All run_script calls will be rejected.\n" +
         "Set ALLOWED_PROJECTS env var to comma-separated absolute paths.\n",
+    );
+  }
+
+  if (allowedScripts.length === 0) {
+    process.stderr.write(
+      "[sandbox-runner] WARNING: ALLOWED_SCRIPTS is empty. All run_script calls will be rejected.\n" +
+        "Set ALLOWED_SCRIPTS env var to comma-separated script names.\n",
     );
   }
 
@@ -76,6 +83,18 @@ export function createServer({ allowedProjects = [] } = {}) {
             {
               type: "text",
               text: `Error: script "${script}" not found in package.json.\nAvailable: ${available}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      if (!allowedScripts.includes(script)) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: script "${script}" is not in ALLOWED_SCRIPTS.\nAllowed: ${allowedScripts.join(", ") || "(none)"}`,
             },
           ],
           isError: true,

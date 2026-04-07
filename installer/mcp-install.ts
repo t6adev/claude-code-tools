@@ -115,6 +115,19 @@ function claudeCliAvailable(): boolean {
 }
 
 /**
+ * 既存の env 文字列から指定キーの値をパースする。
+ * `claude mcp get` の出力形式 "KEY1=val1, KEY2=val2" に対応。
+ */
+function parseEnvValue(envStr: string, key: string): string[] {
+  const match = envStr.match(new RegExp(`${key}=([^,]*(?:,[^,]*)*?)(?:,\\s*\\w+=|$)`));
+  if (!match) return [];
+  return match[1]
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+/**
  * 既存の ALLOWED_PROJECTS に projectDir をマージした env を返す。
  * 既に含まれている場合はそのまま返す。
  */
@@ -125,19 +138,8 @@ function mergeAllowedProjects(
 ): Record<string, string> {
   const env = { ...entry.env };
 
-  // 既存設定から ALLOWED_PROJECTS を取得
-  let existing: string[] = [];
-  if (existingConfig?.env) {
-    const match = existingConfig.env.match(/ALLOWED_PROJECTS=([^,]*(?:,[^,]*)*?)(?:,\s*\w+=|$)/);
-    if (match) {
-      existing = match[1]
-        .split(",")
-        .map((p) => p.trim())
-        .filter(Boolean);
-    }
-  }
+  const existing = existingConfig?.env ? parseEnvValue(existingConfig.env, "ALLOWED_PROJECTS") : [];
 
-  // マージ
   const merged = new Set(existing);
   merged.add(projectDir);
   env["ALLOWED_PROJECTS"] = [...merged].join(",");
@@ -145,9 +147,36 @@ function mergeAllowedProjects(
   return env;
 }
 
+/**
+ * 既存の ALLOWED_SCRIPTS に新しいスクリプト名をマージした env を返す。
+ */
+function mergeAllowedScripts(
+  env: Record<string, string>,
+  existingConfig: McpConfig | null,
+  newScripts: string[],
+): Record<string, string> {
+  const result = { ...env };
+
+  const existing = existingConfig?.env ? parseEnvValue(existingConfig.env, "ALLOWED_SCRIPTS") : [];
+
+  const merged = new Set(existing);
+  for (const s of newScripts) {
+    merged.add(s);
+  }
+  result["ALLOWED_SCRIPTS"] = [...merged].join(",");
+
+  return result;
+}
+
 export function installMcp(
   entry: McpEntryInfo,
-  opts: { scope: "local" | "global"; dryRun: boolean; repoMcpDir?: string; projectDir?: string },
+  opts: {
+    scope: "local" | "global";
+    dryRun: boolean;
+    repoMcpDir?: string;
+    projectDir?: string;
+    allowedScripts?: string[];
+  },
 ): McpInstallResult {
   // Prepare local server files before MCP registration
   if (entry.local && entry.files && opts.repoMcpDir) {
@@ -186,10 +215,15 @@ export function installMcp(
   }
 
   // 初回: projectDir があれば ALLOWED_PROJECTS に設定
-  const initialEnv =
+  let initialEnv =
     opts.projectDir && entry.env && "ALLOWED_PROJECTS" in entry.env
       ? { ...entry.env, ALLOWED_PROJECTS: opts.projectDir }
       : entry.env;
+
+  // 初回: allowedScripts があれば ALLOWED_SCRIPTS に設定
+  if (opts.allowedScripts?.length && initialEnv && "ALLOWED_SCRIPTS" in initialEnv) {
+    initialEnv = { ...initialEnv, ALLOWED_SCRIPTS: opts.allowedScripts.join(",") };
+  }
 
   try {
     execFileSync("claude", buildAddArgs(initialEnv), { stdio: ["inherit", "inherit", "pipe"] });
@@ -202,10 +236,15 @@ export function installMcp(
       const oldConfig = getExistingMcpConfig(entry.name);
 
       // projectDir があれば既存の ALLOWED_PROJECTS にマージ
-      const mergedEnv =
+      let mergedEnv =
         opts.projectDir && entry.env && "ALLOWED_PROJECTS" in entry.env
           ? mergeAllowedProjects(entry, oldConfig, opts.projectDir)
-          : entry.env;
+          : (entry.env ?? {});
+
+      // allowedScripts があれば既存の ALLOWED_SCRIPTS にマージ
+      if (opts.allowedScripts?.length && entry.env && "ALLOWED_SCRIPTS" in entry.env) {
+        mergedEnv = mergeAllowedScripts(mergedEnv, oldConfig, opts.allowedScripts);
+      }
 
       const newConfig = formatNewConfig({ ...entry, env: mergedEnv });
       const oldConfigStr = oldConfig

@@ -13,6 +13,7 @@ import {
   log,
   cancel,
   isCancel,
+  text,
 } from "@clack/prompts";
 import {
   discoverSkills,
@@ -462,6 +463,92 @@ async function main(): Promise<void> {
     const selectedIds = selectedMcpIds as string[];
     const selectedEntries = allEntries.filter((e) => selectedIds.includes(e.serverDir));
 
+    // sandbox-runner が選択されている場合、ALLOWED_SCRIPTS を設定させる
+    let allowedScripts: string[] = [];
+    const hasSandboxRunner = selectedEntries.some((e) => e.name === "sandbox-runner");
+    if (hasSandboxRunner) {
+      // package.json から scripts を読み取って選択肢にする
+      const pkgJsonPath = path.join(process.cwd(), "package.json");
+      let projectScripts: Record<string, string> = {};
+      try {
+        const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8")) as {
+          scripts?: Record<string, string>;
+        };
+        projectScripts = pkgJson.scripts ?? {};
+      } catch {
+        // package.json が無い / 読めない場合は手動入力にフォールバック
+      }
+
+      const scriptNames = Object.keys(projectScripts);
+
+      if (scriptNames.length > 0) {
+        const selectedScripts = await multiselect({
+          message: "sandbox-runner: 許可するスクリプトを選んでください（スペースで選択）",
+          options: scriptNames.map((name) => ({
+            value: name,
+            label: name,
+            hint: projectScripts[name],
+          })),
+          initialValues: [],
+          required: false,
+        });
+
+        if (isCancel(selectedScripts)) {
+          cancel("キャンセルしました。");
+          process.exit(0);
+        }
+
+        allowedScripts = selectedScripts as string[];
+
+        // 追加で手入力も受け付ける
+        const extraInput = await text({
+          message:
+            "追加で許可するスクリプト名があればカンマ区切りで入力してください（なければ空欄で Enter）",
+          placeholder: "deploy,migrate",
+          defaultValue: "",
+        });
+
+        if (isCancel(extraInput)) {
+          cancel("キャンセルしました。");
+          process.exit(0);
+        }
+
+        const extra = (extraInput as string)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        allowedScripts = [...new Set([...allowedScripts, ...extra])];
+      } else {
+        // package.json が無い場合は手動入力
+        const scriptsInput = await text({
+          message:
+            "sandbox-runner: 許可するスクリプト名を入力してください（カンマ区切り、例: e2e,build,test）",
+          placeholder: "e2e,build,test",
+          validate: (value) => {
+            if (!value.trim()) return "少なくとも 1 つのスクリプト名を入力してください";
+            return undefined;
+          },
+        });
+
+        if (isCancel(scriptsInput)) {
+          cancel("キャンセルしました。");
+          process.exit(0);
+        }
+
+        allowedScripts = (scriptsInput as string)
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+
+      if (allowedScripts.length === 0) {
+        log.warn(
+          "sandbox-runner: ALLOWED_SCRIPTS が空です。run_script は全て拒否されます。\n" +
+            "後から追加するには、インストーラーを再実行するか claude mcp add で設定してください。",
+        );
+      }
+    }
+
     if (selectedEntries.length > 0) {
       const s = spinner();
       s.start("MCP サーバーをインストール中...");
@@ -478,6 +565,7 @@ async function main(): Promise<void> {
           dryRun: DRY_RUN,
           repoMcpDir,
           projectDir: process.cwd(),
+          allowedScripts: entry.name === "sandbox-runner" ? allowedScripts : undefined,
         });
         if (result.action === "installed") {
           installed++;

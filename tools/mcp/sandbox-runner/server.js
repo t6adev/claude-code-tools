@@ -6,6 +6,10 @@ const server = createServer({
     .split(",")
     .map((p) => p.trim())
     .filter(Boolean),
+  allowedScripts: (process.env.ALLOWED_SCRIPTS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
 });
 
 const transport = new StdioServerTransport();

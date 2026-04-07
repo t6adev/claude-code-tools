@@ -5,3 +5,4 @@ local: true
 files: "server.js lib.js package.json package-lock.json"
 env:
   ALLOWED_PROJECTS: ""
+  ALLOWED_SCRIPTS: ""
