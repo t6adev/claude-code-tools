@@ -4,11 +4,12 @@
 
 ## サーバー一覧
 
-| サーバー                  | 説明                                         | 必要な設定       |
-| ------------------------- | -------------------------------------------- | ---------------- |
-| [github](github/)         | GitHub API（PR・Issue・コード検索）          | `GITHUB_TOKEN`   |
-| [filesystem](filesystem/) | ローカルファイルシステムへのアクセス         | 許可ディレクトリ |
-| [playwright](playwright/) | ブラウザ操作・表示確認・コンソールエラー検出 | なし             |
+| サーバー                          | 説明                                             | 必要な設定         |
+| --------------------------------- | ------------------------------------------------ | ------------------ |
+| [github](github/)                 | GitHub API（PR・Issue・コード検索）              | `GITHUB_TOKEN`     |
+| [filesystem](filesystem/)         | ローカルファイルシステムへのアクセス             | 許可ディレクトリ   |
+| [playwright](playwright/)         | ブラウザ操作・表示確認・コンソールエラー検出     | なし               |
+| [sandbox-runner](sandbox-runner/) | サンドボックス外で package.json スクリプトを実行 | `ALLOWED_PROJECTS` |
 
 ## 使い方
 

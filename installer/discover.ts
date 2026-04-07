@@ -34,6 +34,9 @@ export interface McpEntryInfo {
   command: string;
   args: string[];
   env?: Record<string, string>;
+  local?: boolean;
+  files?: string[];
+  postInstallNote?: string;
 }
 
 export function discoverSkills(repoDir: string): SkillInfo[] {
@@ -168,7 +171,14 @@ export function discoverMcpEntries(repoDir: string): McpEntryInfo[] {
 
     const content = fs.readFileSync(yamlPath, "utf-8");
     const parsed = parseMcpYaml(content);
-    if (parsed) results.push({ serverDir, ...parsed });
+    if (!parsed) continue;
+
+    const notePath = path.join(mcpDir, serverDir, "POST_INSTALL.md");
+    const postInstallNote = fs.existsSync(notePath)
+      ? fs.readFileSync(notePath, "utf-8").trim()
+      : undefined;
+
+    results.push({ serverDir, ...parsed, ...(postInstallNote ? { postInstallNote } : {}) });
   }
 
   return results;
@@ -188,6 +198,14 @@ function parseMcpYaml(content: string): Omit<McpEntryInfo, "serverDir"> | null {
 
   const args = argsRaw.split(/\s+/);
 
+  // Parse local flag (boolean)
+  const localRaw = get("local");
+  const local = localRaw === "true";
+
+  // Parse files list (space-separated)
+  const filesRaw = get("files");
+  const files = filesRaw ? filesRaw.split(/\s+/).filter(Boolean) : undefined;
+
   // Parse env block (simple key: value pairs indented under "env:")
   const env: Record<string, string> = {};
   const envMatch = content.match(/^env:\s*\n((?:\s+.+\n?)*)/m);
@@ -203,6 +221,7 @@ function parseMcpYaml(content: string): Omit<McpEntryInfo, "serverDir"> | null {
     command,
     args,
     ...(Object.keys(env).length > 0 ? { env } : {}),
+    ...(local ? { local, files } : {}),
   };
 }
 

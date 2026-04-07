@@ -1,0 +1,7 @@
+name: sandbox-runner
+command: node
+args: "~/.claude/mcp-servers/sandbox-runner/server.js"
+local: true
+files: "server.js lib.js package.json package-lock.json"
+env:
+  ALLOWED_PROJECTS: ""

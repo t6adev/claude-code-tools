@@ -446,7 +446,9 @@ async function main(): Promise<void> {
       options: allEntries.map((e) => ({
         value: e.serverDir,
         label: e.serverDir,
-        hint: `${e.command} ${e.args.join(" ")}`,
+        hint: e.local
+          ? `ローカルサーバー → ~/.claude/mcp-servers/${e.name}/`
+          : `${e.command} ${e.args.join(" ")}`,
       })),
       initialValues: [],
       required: false,
@@ -469,10 +471,13 @@ async function main(): Promise<void> {
       const failedMcps: string[] = [];
       const updatedMcps: Array<{ name: string; previousConfig?: string; diff?: string }> = [];
 
+      const repoMcpDir = path.join(REPO_DIR, "tools", "mcp");
       for (const entry of selectedEntries) {
         const result = installMcp(entry, {
-          scope: isGlobal ? "global" : "local",
+          scope: "global",
           dryRun: DRY_RUN,
+          repoMcpDir,
+          projectDir: process.cwd(),
         });
         if (result.action === "installed") {
           installed++;
@@ -504,6 +509,13 @@ async function main(): Promise<void> {
           log.info(`[${mcp.name}] 変更点:\n${mcp.diff}`);
         } else if (mcp.previousConfig) {
           log.info(`[${mcp.name}] 設定に差分はありません（再インストール）`);
+        }
+      }
+
+      // Show post-install notes for MCP servers
+      for (const entry of selectedEntries) {
+        if (entry.postInstallNote) {
+          log.info(`\n[MCP: ${entry.name}] インストール後の作業:\n${entry.postInstallNote}`);
         }
       }
     }
