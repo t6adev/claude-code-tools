@@ -19,3 +19,11 @@ claude mcp add --scope user sandbox-runner \
  -e ALLOWED_PROJECTS=/path/to/project-a,/path/to/project-b \
  -e ALLOWED_SCRIPTS=e2e,build,test \
  -- node ~/.claude/mcp-servers/sandbox-runner/server.js
+
+git worktree を使う場合は、パスの末尾に / を付けると
+そのディレクトリ配下すべてが許可されます:
+
+claude mcp add --scope user sandbox-runner \
+ -e ALLOWED_PROJECTS=/path/to/worktree-parent/ \
+ -e ALLOWED_SCRIPTS=e2e,build,test \
+ -- node ~/.claude/mcp-servers/sandbox-runner/server.js

@@ -549,6 +549,26 @@ async function main(): Promise<void> {
       }
     }
 
+    // sandbox-runner が選択されている場合、ALLOWED_PROJECTS のパスを編集させる
+    let sandboxProjectDir = process.cwd();
+    if (hasSandboxRunner) {
+      const projectPathInput = await text({
+        message:
+          "sandbox-runner: ALLOWED_PROJECTS に登録するパスを入力してください\n" +
+          "  末尾に / を付けるとそのディレクトリ配下すべてを許可します（worktree 対応）\n" +
+          "  例: /home/user/workspaces/my-project/",
+        placeholder: process.cwd(),
+        defaultValue: process.cwd(),
+      });
+
+      if (isCancel(projectPathInput)) {
+        cancel("キャンセルしました。");
+        process.exit(0);
+      }
+
+      sandboxProjectDir = (projectPathInput as string).trim();
+    }
+
     if (selectedEntries.length > 0) {
       const s = spinner();
       s.start("MCP サーバーをインストール中...");
@@ -564,7 +584,7 @@ async function main(): Promise<void> {
           scope: "global",
           dryRun: DRY_RUN,
           repoMcpDir,
-          projectDir: process.cwd(),
+          projectDir: entry.name === "sandbox-runner" ? sandboxProjectDir : process.cwd(),
           allowedScripts: entry.name === "sandbox-runner" ? allowedScripts : undefined,
         });
         if (result.action === "installed") {

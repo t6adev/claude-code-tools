@@ -287,6 +287,129 @@ describe("sandbox-runner MCP server", () => {
       }
     });
 
+    it("allows subdirectory when parent has trailing slash", async () => {
+      const parentDir = await mkdtemp(join(tmpdir(), "sandbox-runner-parent-"));
+      const childDir = join(parentDir, "child-project");
+      const { mkdir } = await import("node:fs/promises");
+      await mkdir(childDir, { recursive: true });
+      await writeFile(
+        join(childDir, "package.json"),
+        JSON.stringify({ scripts: { hi: 'echo "hi"' } }),
+      );
+      const { client, close } = await connectPair([parentDir + "/"]);
+      try {
+        const result = await client.callTool({
+          name: "list_scripts",
+          arguments: { cwd: childDir },
+        });
+        assert.ok(!result.isError, `Expected success but got: ${result.content[0].text}`);
+        assert.ok(result.content[0].text.includes("hi:"));
+      } finally {
+        await close();
+        await rm(parentDir, { recursive: true, force: true });
+      }
+    });
+
+    it("allows parent directory itself with trailing slash", async () => {
+      const parentDir = await mkdtemp(join(tmpdir(), "sandbox-runner-parent-"));
+      await writeFile(
+        join(parentDir, "package.json"),
+        JSON.stringify({ scripts: { test: "echo ok" } }),
+      );
+      const { client, close } = await connectPair([parentDir + "/"]);
+      try {
+        const result = await client.callTool({
+          name: "list_scripts",
+          arguments: { cwd: parentDir },
+        });
+        assert.ok(!result.isError, `Expected success but got: ${result.content[0].text}`);
+      } finally {
+        await close();
+        await rm(parentDir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects sibling directory with similar name prefix", async () => {
+      const baseDir = await mkdtemp(join(tmpdir(), "sandbox-runner-base-"));
+      const { mkdir } = await import("node:fs/promises");
+      const projectDir2 = join(baseDir, "project");
+      const evilDir = join(baseDir, "project-evil");
+      await mkdir(projectDir2, { recursive: true });
+      await mkdir(evilDir, { recursive: true });
+      await writeFile(join(evilDir, "package.json"), JSON.stringify({ scripts: {} }));
+      const { client, close } = await connectPair([projectDir2 + "/"]);
+      try {
+        const result = await client.callTool({ name: "list_scripts", arguments: { cwd: evilDir } });
+        assert.ok(result.isError);
+        assert.ok(result.content[0].text.includes("not in allow-list"));
+      } finally {
+        await close();
+        await rm(baseDir, { recursive: true, force: true });
+      }
+    });
+
+    it("exact match (no trailing slash) rejects subdirectory", async () => {
+      const parentDir = await mkdtemp(join(tmpdir(), "sandbox-runner-exact-"));
+      const childDir = join(parentDir, "child");
+      const { mkdir } = await import("node:fs/promises");
+      await mkdir(childDir, { recursive: true });
+      await writeFile(join(childDir, "package.json"), JSON.stringify({ scripts: {} }));
+      const { client, close } = await connectPair([parentDir]);
+      try {
+        const result = await client.callTool({
+          name: "list_scripts",
+          arguments: { cwd: childDir },
+        });
+        assert.ok(result.isError);
+        assert.ok(result.content[0].text.includes("not in allow-list"));
+      } finally {
+        await close();
+        await rm(parentDir, { recursive: true, force: true });
+      }
+    });
+
+    it("rejects path traversal under prefix-matched parent", async () => {
+      const baseDir = await mkdtemp(join(tmpdir(), "sandbox-runner-trav-"));
+      const { mkdir } = await import("node:fs/promises");
+      const allowedDir = join(baseDir, "allowed");
+      const secretDir = join(baseDir, "secret");
+      await mkdir(allowedDir, { recursive: true });
+      await mkdir(secretDir, { recursive: true });
+      await writeFile(join(secretDir, "package.json"), JSON.stringify({ scripts: {} }));
+      const { client, close } = await connectPair([allowedDir + "/"]);
+      try {
+        const result = await client.callTool({
+          name: "list_scripts",
+          arguments: { cwd: allowedDir + "/sub/../../../secret" },
+        });
+        assert.ok(result.isError);
+        assert.ok(result.content[0].text.includes("not in allow-list"));
+      } finally {
+        await close();
+        await rm(baseDir, { recursive: true, force: true });
+      }
+    });
+
+    it("allows deeply nested subdirectory with trailing slash", async () => {
+      const parentDir = await mkdtemp(join(tmpdir(), "sandbox-runner-deep-"));
+      const deepDir = join(parentDir, "a", "b", "c");
+      const { mkdir } = await import("node:fs/promises");
+      await mkdir(deepDir, { recursive: true });
+      await writeFile(
+        join(deepDir, "package.json"),
+        JSON.stringify({ scripts: { deep: "echo deep" } }),
+      );
+      const { client, close } = await connectPair([parentDir + "/"]);
+      try {
+        const result = await client.callTool({ name: "list_scripts", arguments: { cwd: deepDir } });
+        assert.ok(!result.isError, `Expected success but got: ${result.content[0].text}`);
+        assert.ok(result.content[0].text.includes("deep:"));
+      } finally {
+        await close();
+        await rm(parentDir, { recursive: true, force: true });
+      }
+    });
+
     it("supports multiple allowed projects", async () => {
       const projectDir2 = await createTempProject({ greet: 'echo "hi"' });
       const { client, close } = await connectPair([projectDir, projectDir2]);

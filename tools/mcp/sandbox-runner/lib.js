@@ -29,7 +29,14 @@ export function createServer({ allowedProjects = [], allowedScripts = [] } = {})
 
   function validateCwd(cwd) {
     const resolved = resolve(cwd);
-    if (!allowedProjects.some((allowed) => resolved === resolve(allowed))) {
+    const isAllowed = allowedProjects.some((allowed) => {
+      if (allowed.endsWith("/")) {
+        const prefix = resolve(allowed);
+        return resolved === prefix || resolved.startsWith(prefix + "/");
+      }
+      return resolved === resolve(allowed);
+    });
+    if (!isAllowed) {
       return {
         ok: false,
         error: `Directory not in allow-list: ${cwd}\nAllowed: ${allowedProjects.join(", ")}`,

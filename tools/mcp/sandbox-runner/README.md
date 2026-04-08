@@ -12,16 +12,16 @@ MCP サーバーは Claude Code ランタイムが直接 spawn するため sand
 
 任意コマンドの実行は不可。以下の多層防御で制約しています:
 
-| 層                    | 対策                                                            |
-| --------------------- | --------------------------------------------------------------- |
-| script 名             | 正規表現 `/^[a-zA-Z0-9_:.-]+$/` で制約                          |
-| script 存在確認       | `package.json` の `scripts` キーと完全一致                      |
-| script ホワイトリスト | `ALLOWED_SCRIPTS` の許可リストと完全一致                        |
-| cwd                   | `ALLOWED_PROJECTS` の許可リストと `path.resolve()` 後の完全一致 |
-| 実行方式              | `execFile("npm", ["run", script])` — シェルを介さない           |
-| 追加引数              | 受け付けない                                                    |
-| 環境変数              | Claude からの注入不可（サーバープロセスの env をそのまま使用）  |
-| タイムアウト          | 最大 10 分に制限                                                |
+| 層                    | 対策                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| script 名             | 正規表現 `/^[a-zA-Z0-9_:.-]+$/` で制約                                                                           |
+| script 存在確認       | `package.json` の `scripts` キーと完全一致                                                                       |
+| script ホワイトリスト | `ALLOWED_SCRIPTS` の許可リストと完全一致                                                                         |
+| cwd                   | `ALLOWED_PROJECTS` の許可リストと `path.resolve()` 後の完全一致、または末尾 `/` 付きパスによるプレフィックス一致 |
+| 実行方式              | `execFile("npm", ["run", script])` — シェルを介さない                                                            |
+| 追加引数              | 受け付けない                                                                                                     |
+| 環境変数              | Claude からの注入不可（サーバープロセスの env をそのまま使用）                                                   |
+| タイムアウト          | 最大 10 分に制限                                                                                                 |
 
 ## 前提条件
 
@@ -68,6 +68,25 @@ claude mcp add --scope user sandbox-runner \
   -e ALLOWED_SCRIPTS=e2e,build,test,lint \
   -- node ~/.claude/mcp-servers/sandbox-runner/server.js
 ```
+
+### ディレクトリ配下の一括許可（worktree 対応）
+
+パスの末尾に `/` を付けると、そのディレクトリ配下のすべてのサブディレクトリも許可されます:
+
+```bash
+claude mcp add --scope user sandbox-runner \
+  -e ALLOWED_PROJECTS=/home/user/workspaces/my-project/ \
+  -e ALLOWED_SCRIPTS=e2e,build,test \
+  -- node ~/.claude/mcp-servers/sandbox-runner/server.js
+```
+
+これにより以下がすべて許可されます:
+
+- `/home/user/workspaces/my-project/` （親ディレクトリ自身）
+- `/home/user/workspaces/my-project/branch-a/` （worktree）
+- `/home/user/workspaces/my-project/feature-b/` （worktree）
+
+末尾 `/` なしの場合は従来通り完全一致のみです。
 
 `ALLOWED_SCRIPTS` に含まれないスクリプト名は実行が拒否されます。`package.json` に定義されていても、ホワイトリストに含まれなければ実行できません。
 
