@@ -12,7 +12,7 @@ export interface McpInstallResult {
   diff?: string;
 }
 
-interface McpConfig {
+export interface McpConfig {
   command: string;
   args: string;
   env: string;
@@ -39,7 +39,7 @@ function getExistingMcpConfig(name: string): McpConfig | null {
   }
 }
 
-function formatNewConfig(entry: McpEntryInfo): McpConfig {
+export function formatNewConfig(entry: McpEntryInfo): McpConfig {
   const envParts: string[] = [];
   if (entry.env) {
     for (const [key, value] of Object.entries(entry.env)) {
@@ -53,7 +53,7 @@ function formatNewConfig(entry: McpEntryInfo): McpConfig {
   };
 }
 
-function buildDiff(oldConfig: McpConfig, newConfig: McpConfig): string | null {
+export function buildDiff(oldConfig: McpConfig, newConfig: McpConfig): string | null {
   const lines: string[] = [];
   for (const key of ["command", "args", "env"] as const) {
     const oldVal = oldConfig[key] || "(なし)";
@@ -118,7 +118,7 @@ function claudeCliAvailable(): boolean {
  * 既存の env 文字列から指定キーの値をパースする。
  * `claude mcp get` の出力形式 "KEY1=val1, KEY2=val2" に対応。
  */
-function parseEnvValue(envStr: string, key: string): string[] {
+export function parseEnvValue(envStr: string, key: string): string[] {
   const match = envStr.match(new RegExp(`${key}=([^,]*(?:,[^,]*)*?)(?:,\\s*\\w+=|$)`));
   if (!match) return [];
   return match[1]
@@ -131,7 +131,7 @@ function parseEnvValue(envStr: string, key: string): string[] {
  * 既存の ALLOWED_PROJECTS に projectDir をマージした env を返す。
  * 既に含まれている場合はそのまま返す。
  */
-function mergeAllowedProjects(
+export function mergeAllowedProjects(
   entry: McpEntryInfo,
   existingConfig: McpConfig | null,
   projectDir: string,
@@ -150,7 +150,7 @@ function mergeAllowedProjects(
 /**
  * 既存の ALLOWED_SCRIPTS に新しいスクリプト名をマージした env を返す。
  */
-function mergeAllowedScripts(
+export function mergeAllowedScripts(
   env: Record<string, string>,
   existingConfig: McpConfig | null,
   newScripts: string[],
