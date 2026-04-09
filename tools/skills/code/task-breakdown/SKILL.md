@@ -172,7 +172,9 @@ gh project list --owner "@me" --limit 10
 7. **オーナーシップ明確化**
    - 誰も触れていないモジュールの整理・廃止検討
 
-Issue の body テンプレートは `${CLAUDE_SKILL_DIR}/references/issue-templates.md` を参照する。
+Issue の body は以下の構成を基本とする（詳細テンプレートが必要な場合のみ `references/issue-templates.md` の該当セクションを参照）:
+
+- ## 概要 / ## 作業内容 / ## 完了条件
 
 ### ユーザーとのタスクリスト確認
 
@@ -224,12 +226,19 @@ gh label create "research" --color "c5def5" --description "調査・決定"
 ### Issue 作成・Project登録
 
 ```bash
-# body には references/issue-templates.md の該当テンプレートを使用する
+# body は Phase 3 で定めた基本構成（概要 / 作業内容 / 完了条件）を使用する
 ISSUE_URL=$(gh issue create \
   --title "docs: [対象のAPI・機能名] のリクエスト/レスポンス仕様を追記する" \
   --label "docs" \
   --body "$(cat <<'EOF'
-[references/issue-templates.md の「ドキュメント補完タスク」テンプレートを貼り付ける]
+## 概要
+[ペインポイント・診断結果から導出した背景]
+
+## 作業内容
+- [具体的な作業項目]
+
+## 完了条件
+- [ ] [検証可能な条件]
 EOF
 )")
 

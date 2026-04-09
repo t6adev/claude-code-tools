@@ -2,7 +2,7 @@
 name: implement-tasks-auto
 description: This skill should be used when the user asks to "これらのIssueを全部実装して", "implement these issues autonomously", "Issue一覧を自動で片付けて", "これらのタスクを順番に実装してPRにして", or provides a list of GitHub Issue numbers/URLs for autonomous batch implementation. Fetches all specified Issues, resolves dependency order, then iterates through each — creating a worktree, implementing, and opening a PR — without user intervention.
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
-argument-hint: "[#1 #2 #3 | issue-url1 issue-url2 ...]"
+argument-hint: "[#1 #2 #3 | issue-url1 issue-url2 ...] [--concurrency N]"
 ---
 
 GitHub Issue のリストを受け取り、依存関係を解析した上で git worktree 内で自律的に実装し、PR を作成するスキル。
@@ -99,7 +99,8 @@ grep -rl "createTable\|defineTable\|schema\|interface.*Model" src/ --include="*.
 # （例: Issue が API エンドポイント追加なら既存の API ファイルを 1 つ読む）
 ```
 
-収集した情報は **コードスニペット**として要約し（各パターン 10〜30 行程度）、全 Agent のプロンプトに含める。
+収集した情報は **参照すべきファイルパスと行番号のリスト**として Agent のプロンプトに含める。
+Agent は必要に応じて Read で内容を読む。プロンプトにコード本文を埋め込まない。
 
 ### CLAUDE.md へのパターン記録
 
@@ -124,7 +125,7 @@ CLAUDE.md に記載されていない場合、**CLAUDE.md に追記する**。
 
 ### 並列実行数の制限（スライディングウィンドウ方式）
 
-同時に実行中の Agent 数は **最大 3** に制限する。
+同時に実行中の Agent 数は **最大 3** に制限する（`$ARGUMENTS` に `--concurrency N` が指定された場合はその値を使用する）。
 バッチ単位で待機するのではなく、**スライディングウィンドウ方式**で逐次投入する:
 
 - 最初に最大 3 件の Agent を `run_in_background: true` で起動する
@@ -141,7 +142,7 @@ CLAUDE.md に記載されていない場合、**CLAUDE.md に追記する**。
 
 ### 並列実行の仕組み
 
-各 Issue に対して、Agent tool を `run_in_background: true` で起動する。
+各 Issue に対して、Agent tool を `run_in_background: true`, `model: "sonnet"` で起動する。
 
 **⚠️ 必須: 初回は 1 つのレスポンス内に複数の Agent tool_use ブロックをまとめて送信する。**
 1 件ずつ別のレスポンスで送信してはならない。以下のように、1 つの assistant メッセージに最大 3 件の tool_use を含める:
@@ -149,9 +150,9 @@ CLAUDE.md に記載されていない場合、**CLAUDE.md に追記する**。
 ```
 // ✅ 正しい: 1 レスポンスに 3 件の tool_use を含める
 assistant response:
-  [tool_use: Agent(description: "Implement #10", prompt: "...", run_in_background: true)]
-  [tool_use: Agent(description: "Implement #11", prompt: "...", run_in_background: true)]
-  [tool_use: Agent(description: "Implement #12", prompt: "...", run_in_background: true)]
+  [tool_use: Agent(description: "Implement #10", prompt: "...", run_in_background: true, model: "sonnet")]
+  [tool_use: Agent(description: "Implement #11", prompt: "...", run_in_background: true, model: "sonnet")]
+  [tool_use: Agent(description: "Implement #12", prompt: "...", run_in_background: true, model: "sonnet")]
 
 // ❌ 誤り: 1 レスポンスに 1 件ずつ
 assistant response 1: [tool_use: Agent(#10)]
@@ -166,9 +167,8 @@ assistant response 3: [tool_use: Agent(#12)]
 - Issue の全文（本文・ラベル・タイトル）— Agent 内での `gh issue view` 再実行を省略するため
 - ベースブランチとブランチ名
 - 元リポジトリのパス
-- CLAUDE.md の内容（プロジェクト規約）— Agent は別コンテキストのため
 - worktree の事前準備コマンド
-- プロジェクト固有のコードパターン（後述「プロジェクトコンテキストの収集と共有」参照）
+- プロジェクト固有のコードパターン（Phase 0.5 で収集したファイルパス参照リスト）
 
 ### スライディングウィンドウの実行ループ
 
